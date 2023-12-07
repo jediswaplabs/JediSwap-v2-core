@@ -90,7 +90,6 @@ mod TickBitmapComponent {
 
     #[generate_trait]
     impl InternalImpl<TContractState, +HasComponent<TContractState>> of InternalTrait<TContractState> {
-        
         fn is_initialized(ref self: ComponentState<TContractState>, tick: i32) -> bool {
             let (next, initialized) = TickBitmapImpl::next_initialized_tick_within_one_word(ref self, tick, IntegerTrait::<i32>::new(1, false), true);
             if next == tick {
