@@ -9,3 +9,8 @@ mod libraries {
     mod tick_math;
     mod tick;
 }
+
+mod test_contracts {
+    mod pool_mint_test;
+    mod pool_swap_test;
+}

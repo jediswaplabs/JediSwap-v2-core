@@ -6,10 +6,13 @@ use yas_core::numbers::signed_integer::{i32::i32};
 
 #[starknet::interface]
 trait IJediSwapV2Factory<TContractState> {
-    fn fee_amount_tick_spacing(self: @TContractState, fee: u32) -> i32;
+    fn fee_amount_tick_spacing(self: @TContractState, fee: u32) -> u32;
     fn get_pool(self: @TContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress;
+    fn get_fee_protocol(self: @TContractState) -> u8;
+    
     fn create_pool(ref self: TContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress;
-    fn enable_fee_amount(ref self: TContractState, fee: u32, tick_spacing: i32);
+    fn enable_fee_amount(ref self: TContractState, fee: u32, tick_spacing: u32);
+    fn set_fee_protocol(ref self: TContractState, fee_protocol: u8);
 }
 
 
@@ -36,6 +39,7 @@ mod JediSwapV2Factory {
     enum Event {
         PoolCreated: PoolCreated,
         FeeAmountEnabled: FeeAmountEnabled,
+        SetFeeProtocol: SetFeeProtocol,
         #[flat]
         OwnableEvent: OwnableComponent::Event
     }
@@ -51,7 +55,7 @@ mod JediSwapV2Factory {
         token0: ContractAddress,
         token1: ContractAddress,
         fee: u32,
-        tick_spacing: i32,
+        tick_spacing: u32,
         pool: ContractAddress
     }
 
@@ -61,15 +65,25 @@ mod JediSwapV2Factory {
     #[derive(Drop, starknet::Event)]
     struct FeeAmountEnabled {
         fee: u32,
-        tick_spacing: i32
+        tick_spacing: u32
+    }
+
+    // @notice Emitted when the protocol fee is changed by the owner
+    // @param old_fee_protocol The previous value of the protocol fee
+    // @param new_fee_protocol The updated value of the protocol fee
+    #[derive(Drop, starknet::Event)]
+    struct SetFeeProtocol {
+        old_fee_protocol: u8,
+        new_fee_protocol: u8
     }
 
     #[storage]
     struct Storage {
         owner: ContractAddress,
-        fee_amount_tick_spacing: LegacyMap::<u32, i32>,
+        fee_amount_tick_spacing: LegacyMap::<u32, u32>,
         pool: LegacyMap<(ContractAddress, ContractAddress, u32), ContractAddress>,
         pool_class_hash: ClassHash,
+        fee_protocol: u8,
         #[substorage(v0)]
         ownable_storage: OwnableComponent::Storage
     }
@@ -81,17 +95,19 @@ mod JediSwapV2Factory {
         assert(pool_class_hash.is_non_zero(), 'pool class hash can not be zero');
         self.pool_class_hash.write(pool_class_hash);
 
-        self.fee_amount_tick_spacing.write(100, IntegerTrait::<i32>::new(2, false));
-        self.emit(FeeAmountEnabled { fee: 100, tick_spacing: IntegerTrait::<i32>::new(2, false) });
+        self.fee_amount_tick_spacing.write(100, 2);
+        self.emit(FeeAmountEnabled { fee: 100, tick_spacing: 2 });
 
-        self.fee_amount_tick_spacing.write(500, IntegerTrait::<i32>::new(10, false));
-        self.emit(FeeAmountEnabled { fee: 500, tick_spacing: IntegerTrait::<i32>::new(10, false) });
+        self.fee_amount_tick_spacing.write(500, 10);
+        self.emit(FeeAmountEnabled { fee: 500, tick_spacing: 10 });
 
-        self.fee_amount_tick_spacing.write(3000, IntegerTrait::<i32>::new(60, false));
-        self.emit(FeeAmountEnabled { fee: 3000, tick_spacing: IntegerTrait::<i32>::new(60, false) });
+        self.fee_amount_tick_spacing.write(3000, 60);
+        self.emit(FeeAmountEnabled { fee: 3000, tick_spacing: 60 });
         
-        self.fee_amount_tick_spacing.write(10000, IntegerTrait::<i32>::new(200, false));
-        self.emit(FeeAmountEnabled { fee: 10000, tick_spacing: IntegerTrait::<i32>::new(200, false) });
+        self.fee_amount_tick_spacing.write(10000, 200);
+        self.emit(FeeAmountEnabled { fee: 10000, tick_spacing: 200 });
+
+        self.fee_protocol.write(0);
     }
 
     #[external(v0)]
@@ -101,7 +117,7 @@ mod JediSwapV2Factory {
         // @dev A fee amount can never be removed, so this value should be hard coded or cached in the calling context
         // @param fee The enabled fee, denominated in hundredths of a bip. Returns 0 in case of unenabled fee
         // @return The tick spacing
-        fn fee_amount_tick_spacing(self: @ContractState, fee: u32) -> i32 {
+        fn fee_amount_tick_spacing(self: @ContractState, fee: u32) -> u32 {
             self.fee_amount_tick_spacing.read(fee)
         }
 
@@ -110,9 +126,16 @@ mod JediSwapV2Factory {
         // @param token_a The contract address of either token0 or token1
         // @param token_b The contract address of the other token
         // @param fee The fee collected upon every swap in the pool, denominated in hundredths of a bip
-        // @return pool The pool address
+        // @return The pool address
         fn get_pool(self: @ContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress {
             self.pool.read((token_a, token_b, fee))
+        }
+
+        // @notice The current protocol fee as a percentage of the swap fee taken on withdrawal
+        // represented as an integer denominator (1/x)%
+        // @return The current protocol fee denominator
+        fn get_fee_protocol(self: @ContractState) -> u8 {
+            self.fee_protocol.read()
         }
 
         // @notice Creates a pool for the given two tokens and fee
@@ -122,7 +145,7 @@ mod JediSwapV2Factory {
         // @dev token_a and token_b may be passed in either order: token0/token1 or token1/token0. tick_spacing is retrieved
         // from the fee. The call will revert if the pool already exists, the fee is invalid, or the token arguments
         // are invalid.
-        // @return pool The address of the newly created pool
+        // @return The address of the newly created pool
         fn create_pool(ref self: ContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress {
             assert(token_a != token_b, 'tokens must be different');
             assert(token_a.is_non_zero() && token_b.is_non_zero(), 'tokens must be non zero');
@@ -165,18 +188,29 @@ mod JediSwapV2Factory {
         // @dev Fee amounts may never be removed once enabled
         // @param fee The fee amount to enable, denominated in hundredths of a bip (i.e. 1e-6)
         // @param tick_spacing The spacing between ticks to be enforced for all pools created with the given fee amount
-        fn enable_fee_amount(ref self: ContractState, fee: u32, tick_spacing: i32) {
+        fn enable_fee_amount(ref self: ContractState, fee: u32, tick_spacing: u32) {
             self.ownable_storage.assert_only_owner();
-            assert(fee < 1000000, 'fee cannot be above 1000000');
+            assert(fee <= 100000, 'fee cannot be above 100000');
 
             // tick spacing is capped at 16384 to prevent the situation where tick_spacing is so large that
             // TickBitmap#next_initialized_tick_within_one_word overflows int24 container from a valid tick
             // 16384 ticks represents a >5x price change with ticks of 1 bips
-            assert(tick_spacing > IntegerTrait::<i32>::new(0, false) && tick_spacing < IntegerTrait::<i32>::new(16384, false), 'invalid tick_spacing');
+            assert(tick_spacing > 0 && tick_spacing < 16384, 'invalid tick_spacing');
             assert(self.fee_amount_tick_spacing(fee).is_zero(), 'fee already enabled');
 
             self.fee_amount_tick_spacing.write(fee, tick_spacing);
             self.emit(FeeAmountEnabled { fee, tick_spacing });
+        }
+
+        // @notice Set the denominator of the protocol's % share of the fees
+        // @param fee_protocol new protocol fee
+        fn set_fee_protocol(ref self: ContractState, fee_protocol: u8) {
+            self.ownable_storage.assert_only_owner();
+            assert(fee_protocol == 0 || (fee_protocol >= 4 && fee_protocol <= 10), 'incorrect fee_protocol');
+
+            let old_fee_protocol = self.fee_protocol.read();
+            self.fee_protocol.write(fee_protocol);
+            self.emit(SetFeeProtocol { old_fee_protocol, new_fee_protocol: fee_protocol });
         }
     }
 }

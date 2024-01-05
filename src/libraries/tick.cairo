@@ -25,7 +25,7 @@ impl DefaultTickInfo of Default<TickInfo> {
 
 #[starknet::interface]
 trait ITick<TState> {
-    fn tick_spacing_to_max_liquidity_per_tick(self: @TState, tick_spacing: i32) -> u128;
+    fn tick_spacing_to_max_liquidity_per_tick(self: @TState, tick_spacing: u32) -> u128;
     fn get_fee_growth_inside(self: @TState, tick_lower: i32, tick_upper: i32, tick_current: i32, fee_growth_global_0_X128: u256, fee_growth_global_1_X128: u256) -> (u256, u256);
     fn update(ref self: TState, tick: i32, tick_current: i32, liquidity_delta: i128, fee_growth_global_0_X128: u256, fee_growth_global_1_X128: u256, upper: bool, max_liquidity: u128) -> bool;
     fn clear(ref self: TState, tick: i32);
@@ -56,10 +56,11 @@ mod TickComponent {
         // @param tick_spacing The amount of required tick separation, realized in multiples of `tick_spacing`
         //     e.g., a tick_spacing of 3 requires ticks to be initialized every 3rd tick i.e., ..., -6, -3, 0, 3, 6, ...
         // @return The max liquidity per tick
-        fn tick_spacing_to_max_liquidity_per_tick(self: @ComponentState<TContractState>, tick_spacing: i32) -> u128 {
-            let min_tick = i32_div_no_round(MIN_TICK(), tick_spacing) * tick_spacing;
-            let max_tick = i32_div_no_round(MAX_TICK(), tick_spacing) * tick_spacing;
-            let num_ticks = i32_div_no_round((max_tick - min_tick), tick_spacing) + IntegerTrait::<i32>::new(1, false);
+        fn tick_spacing_to_max_liquidity_per_tick(self: @ComponentState<TContractState>, tick_spacing: u32) -> u128 {
+            let tick_spacing_i = IntegerTrait::<i32>::new(tick_spacing, false);
+            let min_tick = i32_div_no_round(MIN_TICK(), tick_spacing_i) * tick_spacing_i;
+            let max_tick = i32_div_no_round(MAX_TICK(), tick_spacing_i) * tick_spacing_i;
+            let num_ticks = i32_div_no_round((max_tick - min_tick), tick_spacing_i) + IntegerTrait::<i32>::new(1, false);
 
             let max_u128: u128 = BoundedInt::max();
             max_u128 / num_ticks.try_into().expect('num ticks cannot be negative!')
@@ -151,17 +152,17 @@ mod TickComponent {
             flipped
         }
 
-        /// @notice Clears tick data
-        /// @param tick The tick that will be cleared
+        // @notice Clears tick data
+        // @param tick The tick that will be cleared
         fn clear(ref self: ComponentState<TContractState>, tick: i32) {
             self.ticks.write(tick, Default::default());
         }
 
-        /// @notice Transitions to next tick as needed by price movement
-        /// @param tick The destination tick of the transition
-        /// @param fee_growth_global_0_X128 The all-time global fee growth, per unit of liquidity, in token0
-        /// @param fee_growth_global_1_X128 The all-time global fee growth, per unit of liquidity, in token1
-        /// @return liquidity_net The amount of liquidity added (subtracted) when tick is crossed from left to right (right to left)
+        // @notice Transitions to next tick as needed by price movement
+        // @param tick The destination tick of the transition
+        // @param fee_growth_global_0_X128 The all-time global fee growth, per unit of liquidity, in token0
+        // @param fee_growth_global_1_X128 The all-time global fee growth, per unit of liquidity, in token1
+        // @return liquidity_net The amount of liquidity added (subtracted) when tick is crossed from left to right (right to left)
         fn cross(ref self: ComponentState<TContractState>, tick: i32, fee_growth_global_0_X128: u256, fee_growth_global_1_X128: u256) -> i128 {
             let mut tick_info: TickInfo = self.ticks.read(tick);
             tick_info.fee_growth_outside_0_X128 = fee_growth_global_0_X128 - tick_info.fee_growth_outside_0_X128;

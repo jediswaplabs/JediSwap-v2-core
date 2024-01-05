@@ -8,7 +8,9 @@ fn expand_to_18_decimals(n: u256) -> u256 {
     n * 1000000000000000000
 }
 
-// TODO encode_price_sqrt
+
+// def encode_price_sqrt(a, b): 
+//      return int(math.sqrt(a/b) * (2**96))
 
 // exact amount in that gets capped at price target in one to zero
 #[test]
@@ -18,7 +20,7 @@ fn test_amount_in_gets_capped_at_price_target_in_one_to_zero() {
     let liquidity: u128 = expand_to_18_decimals(2).try_into().unwrap();
     let amount = IntegerTrait::<i256>::new(expand_to_18_decimals(1), false);
     let fee: u32 = 600;
-    let zero_to_one = false;
+    let zero_for_one = false;
 
     let (sqrt_q_x96, amount_in, amount_out, fee_amount) = SwapMath::compute_swap_step(
         price, price_target, liquidity, amount, fee
@@ -32,7 +34,7 @@ fn test_amount_in_gets_capped_at_price_target_in_one_to_zero() {
     );
 
     let price_after_whole_input_amount = SqrtPriceMath::get_next_sqrt_price_from_input(
-        price, liquidity, amount.try_into().unwrap(), zero_to_one
+        price, liquidity, amount.try_into().unwrap(), zero_for_one
     );
 
     assert(sqrt_q_x96 == price_target, 'price is capped at price target');
@@ -49,7 +51,7 @@ fn test_amount_out_gets_capped_at_price_target_in_one_to_zero() {
     let liquidity: u128 = expand_to_18_decimals(2).try_into().unwrap();
     let amount = IntegerTrait::<i256>::new(expand_to_18_decimals(1), true);
     let fee = 600;
-    let zero_to_one = false;
+    let zero_for_one = false;
 
     let (sqrt_q_x96, amount_in, amount_out, fee_amount) = SwapMath::compute_swap_step(
         price, price_target, liquidity, amount, fee
@@ -61,7 +63,7 @@ fn test_amount_out_gets_capped_at_price_target_in_one_to_zero() {
     assert(amount_out < expand_to_18_decimals(1), 'entire amount out isnt returned');
 
     let price_after_whole_input_amount = SqrtPriceMath::get_next_sqrt_price_from_output(
-        price, liquidity, expand_to_18_decimals(1), zero_to_one
+        price, liquidity, expand_to_18_decimals(1), zero_for_one
     );
 
     assert(sqrt_q_x96 == price_target, 'price is capped at price target');
@@ -77,7 +79,7 @@ fn test_amount_in_that_is_fully_spent_in_one_to_zero() {
     let liquidity: u128 = expand_to_18_decimals(2).try_into().unwrap();
     let amount = IntegerTrait::<i256>::new(expand_to_18_decimals(1), false);
     let fee = 600;
-    let zero_to_one = false;
+    let zero_for_one = false;
 
     let (sqrt_q_x96, amount_in, amount_out, fee_amount) = SwapMath::compute_swap_step(
         price, price_target, liquidity, amount, fee
@@ -92,7 +94,7 @@ fn test_amount_in_that_is_fully_spent_in_one_to_zero() {
 
     let price_after_whole_import_amount_less_fee =
         SqrtPriceMath::get_next_sqrt_price_from_input(
-        price, liquidity, amount.try_into().unwrap() - fee_amount, zero_to_one
+        price, liquidity, amount.try_into().unwrap() - fee_amount, zero_for_one
     );
 
     assert(sqrt_q_x96 < price_target, 'price is capped at price target');
@@ -110,7 +112,7 @@ fn test_amount_out_that_is_fully_received_in_one_to_zero() {
     let liquidity: u128 = expand_to_18_decimals(2).try_into().unwrap();
     let amount = IntegerTrait::<i256>::new(expand_to_18_decimals(1), true);
     let fee = 600;
-    let zero_to_one = false;
+    let zero_for_one = false;
 
     let (sqrt_q_x96, amount_in, amount_out, fee_amount) = SwapMath::compute_swap_step(
         price, price_target, liquidity, amount, fee
@@ -121,7 +123,7 @@ fn test_amount_out_that_is_fully_received_in_one_to_zero() {
     assert(amount_out == expand_to_18_decimals(1), 'incorrect amount_out');
 
     let price_after_whole_output_amount = SqrtPriceMath::get_next_sqrt_price_from_output(
-        price, liquidity, expand_to_18_decimals(1), zero_to_one
+        price, liquidity, expand_to_18_decimals(1), zero_for_one
     );
 
     assert(sqrt_q_x96 < price_target, 'price doest reach price target');
@@ -193,7 +195,7 @@ fn test_entire_input_amount_taken_as_fee() {
 
 // handles intermediate insufficient liquidity in zero for one exact output case
 #[test]
-fn test_handles_intermediate_insufficient_liq_in_zero_to_one_exact_output_case() {
+fn test_handles_intermediate_insufficient_liq_in_zero_for_one_exact_output_case() {
     let price = 20282409603651670423947251286016;
     let price_target = price * 11 / 10;
     let liquidity: u128 = 1024;

@@ -31,7 +31,7 @@ fn STATE() -> TickBitmapMock::ContractState {
 }
 
 fn flip_tick(mut state: TickBitmapMock::ContractState, tick: i32) ->  TickBitmapMock::ContractState {
-    state.tick_bitmap_storage.flip_tick(tick, IntegerTrait::<i32>::new(1, false));
+    state.tick_bitmap_storage.flip_tick(tick, 1);
     state
 }
 
@@ -136,7 +136,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_returns_tick_to_
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(78, false), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(78, false), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(84, false), 'Not 84');
     assert(initialized, 'Not Initialized');
@@ -148,7 +148,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_returns_tick_to_
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(55, true), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(55, true), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(4, true), 'Not -4');
     assert(initialized, 'Not Initialized');
@@ -160,7 +160,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_returns_tick_dir
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(77, false), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(77, false), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(78, false), 'Not 78');
     assert(initialized, 'Not Initialized');
@@ -172,7 +172,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_returns_tick_dir
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(56, true), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(56, true), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(55, true), 'Not -55');
     assert(initialized, 'Not Initialized');
@@ -184,7 +184,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_returns_the_next
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(255, false), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(255, false), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(511, false), 'Not 511');
     assert(!initialized, 'Initialized');
@@ -196,7 +196,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_returns_the_next
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(257, true), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(257, true), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(200, true), 'Not -200');
     assert(initialized, 'Not Initialized');
@@ -209,7 +209,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_returns_the_next
     state = flip_ticks(state);
     state = flip_tick(state, IntegerTrait::<i32>::new(340, false));
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(328, false), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(328, false), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(340, false), 'Not 340');
     assert(initialized, 'Not Initialized');
@@ -221,7 +221,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_does_not_exceed_
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(508, false), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(508, false), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(511, false), 'Not 511');
     assert(!initialized, 'Initialized');
@@ -233,7 +233,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_skips_entire_wor
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(255, false), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(255, false), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(511, false), 'Not 511');
     assert(!initialized, 'Initialized');
@@ -245,7 +245,7 @@ fn test_next_initialized_tick_within_one_word_search_left_false_skips_half_word(
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(383, false), IntegerTrait::<i32>::new(1, false), false);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(383, false), 1, false);
 
     assert(next == IntegerTrait::<i32>::new(511, false), 'Not 511');
     assert(!initialized, 'Initialized');
@@ -257,7 +257,7 @@ fn test_next_initialized_tick_within_one_word_search_left_true_returns_same_tick
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(78, false), IntegerTrait::<i32>::new(1, false), true);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(78, false), 1, true);
 
     assert(next == IntegerTrait::<i32>::new(78, false), 'Not 78');
     assert(initialized, 'Not Initialized');
@@ -269,7 +269,7 @@ fn test_next_initialized_tick_within_one_word_search_left_true_returns_tick_dire
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(79, false), IntegerTrait::<i32>::new(1, false), true);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(79, false), 1, true);
 
     assert(next == IntegerTrait::<i32>::new(78, false), 'Not 78');
     assert(initialized, 'Not Initialized');
@@ -281,7 +281,7 @@ fn test_next_initialized_tick_within_one_word_search_left_true_will_not_exceed_t
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(258, false), IntegerTrait::<i32>::new(1, false), true);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(258, false), 1, true);
 
     assert(next == IntegerTrait::<i32>::new(256, false), 'Not 256');
     assert(!initialized, 'Initialized');
@@ -293,7 +293,7 @@ fn test_next_initialized_tick_within_one_word_search_left_true_at_the_word_bound
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(256, false), IntegerTrait::<i32>::new(1, false), true);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(256, false), 1, true);
 
     assert(next == IntegerTrait::<i32>::new(256, false), 'Not 256');
     assert(!initialized, 'Initialized');
@@ -305,7 +305,7 @@ fn test_next_initialized_tick_within_one_word_search_left_true_at_the_word_bound
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(257, true), IntegerTrait::<i32>::new(1, false), true);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(257, true), 1, true);
 
     assert(next == IntegerTrait::<i32>::new(512, true), 'Not -512');
     assert(!initialized, 'Initialized');
@@ -317,7 +317,7 @@ fn test_next_initialized_tick_within_one_word_search_left_true_entire_empty_word
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(1023, false), IntegerTrait::<i32>::new(1, false), true);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(1023, false), 1, true);
 
     assert(next == IntegerTrait::<i32>::new(768, false), 'Not 768');
     assert(!initialized, 'Initialized');
@@ -329,7 +329,7 @@ fn test_next_initialized_tick_within_one_word_search_left_true_halfway_through_e
     
     state = flip_ticks(state);
 
-    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(900, false), IntegerTrait::<i32>::new(1, false), true);
+    let (next, initialized) = state.tick_bitmap_storage.next_initialized_tick_within_one_word(IntegerTrait::<i32>::new(900, false), 1, true);
 
     assert(next == IntegerTrait::<i32>::new(768, false), 'Not 768');
     assert(!initialized, 'Initialized');

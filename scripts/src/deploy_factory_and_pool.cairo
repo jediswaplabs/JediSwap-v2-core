@@ -12,22 +12,28 @@ fn main() {
     let pool_declare_result = declare('JediSwapV2Pool', Option::Some(max_fee));
     let pool_class_hash = pool_declare_result.class_hash;
 
+    // let pool_class_hash: ClassHash = 0x06b8ae9efb0dbe07d7d047fb377734d4e8b881febd38f480cd1dc4f077fd3d84.try_into().unwrap();
+
     let factory_declare_result = declare('JediSwapV2Factory', Option::Some(max_fee));
     let factory_class_hash = factory_declare_result.class_hash;
+
+    // let factory_class_hash: ClassHash = 0x048b6ec215dfa1930ec8d7fad1a186f301221815e401414544ab542e507e424c.try_into().unwrap();
     
     let mut factory_constructor_data = Default::default();
     Serde::serialize(@owner(), ref factory_constructor_data);
     Serde::serialize(@pool_class_hash, ref factory_constructor_data);
     let factory_deploy_result = deploy(factory_class_hash, factory_constructor_data, Option::Some(salt), true, Option::Some(max_fee));
     let factory_contract_address = factory_deploy_result.contract_address;
-    
-    'Deployed to '.print();
+
+    // let factory_contract_address: ContractAddress = 0x6b4115fa43c48118d3f79fbc500c75917c8a28d0f867479acb81893ea1e036c.try_into().unwrap(); //TODO environment variable
+
+    'Factory Deployed to '.print();
     factory_contract_address.print();
 
 
     let token0: ContractAddress = 1.try_into().unwrap();
     let token1: ContractAddress = 2.try_into().unwrap();
-    let fee: u32 = 500;
+    let fee: u32 = 100;
 
     let mut invoke_data = Default::default();
     Serde::serialize(@token0, ref invoke_data);
@@ -51,5 +57,5 @@ fn main() {
     let call_result = call(factory_contract_address, 'get_pool', call_data);
     'Call result '.print();
     call_result.data.len().print();
-    assert(*call_result.data.at(0) != 0, *call_result.data.at(0));
+    assert(*call_result.data.at(0) == 0, *call_result.data.at(0));
 }

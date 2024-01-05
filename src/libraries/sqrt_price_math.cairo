@@ -43,7 +43,9 @@ mod SqrtPriceMath {
             assert(product / amount == sqrt_p_x96, 'product overflows');
             assert(numerator > product, 'denominator negative');
             let denominator = numerator - product;
-            return mul_div_rounding_up(numerator, sqrt_p_x96, denominator);
+            let to_return = mul_div_rounding_up(numerator, sqrt_p_x96, denominator);
+            assert(to_return <= MAX_UINT160, 'does not fit uint160');
+            return to_return;
         }
     }
 
@@ -63,7 +65,9 @@ mod SqrtPriceMath {
         // in both cases, avoid a mulDiv for most inputs
         if (add) {
             let quotient = if (amount <= MAX_UINT160) { amount.shl(R96) / liquidity.into() } else { mul_div(amount, Q96, liquidity.into())};
-            return sqrt_p_x96 + quotient;
+            let to_return = sqrt_p_x96 + quotient;
+            assert(to_return <= MAX_UINT160, 'does not fit uint160');
+            return to_return;
         } else {
             let quotient = if (amount <= MAX_UINT160) { div_rounding_up(amount.shl(R96), liquidity.into()) } else { mul_div_rounding_up(amount, Q96, liquidity.into())};
             assert(sqrt_p_x96 > quotient, 'sqrt_p_x96 < quotient');
@@ -76,11 +80,11 @@ mod SqrtPriceMath {
     // @param sqrt_p_x96 The starting price, i.e., before accounting for the input amount
     // @param liquidity The amount of usable liquidity
     // @param amount_in How much of token0 or token1 is being swapped in
-    // @param zero_to_one Whether the amount in is token0 or token1
+    // @param zero_for_one Whether the amount in is token0 or token1
     // @return The price after adding the input amount to token0 or token1
-    fn get_next_sqrt_price_from_input(sqrt_p_x96: u256, liquidity: u128, amount_in: u256, zero_to_one: bool) -> u256 {
+    fn get_next_sqrt_price_from_input(sqrt_p_x96: u256, liquidity: u128, amount_in: u256, zero_for_one: bool) -> u256 {
         assert(sqrt_p_x96 > 0 && liquidity > 0, 'sqrt_p_x96 or liquidity <= 0');
-        if (zero_to_one) {
+        if (zero_for_one) {
             return get_next_sqrt_price_from_amount0_rounding_up(sqrt_p_x96, liquidity, amount_in, true);
         } else {
             return get_next_sqrt_price_from_amount1_rounding_down(sqrt_p_x96, liquidity, amount_in, true);
@@ -92,12 +96,12 @@ mod SqrtPriceMath {
     // @param sqrt_p_x96 The starting price before accounting for the output amount
     // @param liquidity The amount of usable liquidity
     // @param amount_out How much of token0 or token1 is being swapped out
-    // @param zero_to_one Whether the amount out is token0 or token1
+    // @param zero_for_one Whether the amount out is token0 or token1
     // @return The price after removing the output amount of token0 or token1
-    fn get_next_sqrt_price_from_output(sqrt_p_x96: u256, liquidity: u128, amount_out: u256, zero_to_one: bool) -> u256 {
+    fn get_next_sqrt_price_from_output(sqrt_p_x96: u256, liquidity: u128, amount_out: u256, zero_for_one: bool) -> u256 {
         assert(sqrt_p_x96 > 0 && liquidity > 0, 'sqrt_p_x96 or liquidity <= 0');
 
-        if (zero_to_one) {
+        if (zero_for_one) {
             return get_next_sqrt_price_from_amount1_rounding_down(sqrt_p_x96, liquidity, amount_out, false);
         } else {
             return get_next_sqrt_price_from_amount0_rounding_up(sqrt_p_x96, liquidity, amount_out, false);
