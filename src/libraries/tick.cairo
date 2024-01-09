@@ -92,18 +92,17 @@ mod TickComponent {
                 (fee_growth_global_0_X128 - upper.fee_growth_outside_0_X128, fee_growth_global_1_X128 - upper.fee_growth_outside_1_X128)
             };
 
-            // this function mimics the u256 overflow that occurs in Solidity, TODO
-            // (
-            //     mod_subtraction(
-            //         mod_subtraction(fee_growth_global_0_X128, fee_growth_below_0_X128),
-            //         fee_growth_above_0_X128
-            //     ),
-            //     mod_subtraction(
-            //         mod_subtraction(fee_growth_global_1_X128, fee_growth_below_1_X128),
-            //         fee_growth_above_1_X128
-            //     )
-            // )
-            (fee_growth_global_0_X128 - fee_growth_below_0_X128 - fee_growth_above_0_X128, fee_growth_global_1_X128 - fee_growth_below_1_X128 - fee_growth_above_1_X128)
+            // this function mimics the u256 overflow that occurs in Solidity
+            (
+                mod_subtraction(
+                    mod_subtraction(fee_growth_global_0_X128, fee_growth_below_0_X128),
+                    fee_growth_above_0_X128
+                ),
+                mod_subtraction(
+                    mod_subtraction(fee_growth_global_1_X128, fee_growth_below_1_X128),
+                    fee_growth_above_1_X128
+                )
+            )
         }
 
         // @notice Updates a tick and returns true if the tick was flipped from initialized to uninitialized, or vice versa
@@ -169,6 +168,17 @@ mod TickComponent {
             tick_info.fee_growth_outside_1_X128 = fee_growth_global_1_X128 - tick_info.fee_growth_outside_1_X128;
             self.ticks.write(tick, tick_info);
             tick_info.liquidity_net
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl<TContractState, +HasComponent<TContractState>> of InternalTrait<TContractState> {
+        fn get_tick(self: @ComponentState<TContractState>, tick: i32) -> TickInfo {
+            self.ticks.read(tick)
+        }
+        
+        fn set_tick(ref self: ComponentState<TContractState>, tick: i32, tick_info: TickInfo) {
+            self.ticks.write(tick, tick_info);
         }
     }
 }
