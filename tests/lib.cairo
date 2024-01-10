@@ -7,4 +7,6 @@ mod test_libraries {
 }
 mod test_factory;
 mod test_pool;
+mod test_pool_swaps;
+mod test_pool_multi_swap;
 mod utils;

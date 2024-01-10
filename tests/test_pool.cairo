@@ -41,7 +41,7 @@ fn create_pool() -> ContractAddress {
     pool_address
 }
 
-fn initialize_pool_10_1() -> ContractAddress {
+fn initialize_pool_1_10() -> ContractAddress {
     let pool_address = create_pool();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
@@ -69,8 +69,8 @@ fn get_pool_swap_test_dispatcher() -> IPoolSwapTestDispatcher {
     IPoolSwapTestDispatcher { contract_address: pool_swap_test_address }
 }
 
-fn initiate_pool_10_1_with_intial_mint() -> (ContractAddress, IPoolMintTestDispatcher) {
-    let pool_address = initialize_pool_10_1();
+fn initiate_pool_1_10_with_intial_mint() -> (ContractAddress, IPoolMintTestDispatcher) {
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -197,7 +197,7 @@ fn test_mint_fails_if_not_initialized() {
 #[test]
 #[should_panic(expected: ('TLU',))]
 fn test_mint_fails_if_tick_lower_greater_than_tick_upper() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -207,7 +207,7 @@ fn test_mint_fails_if_tick_lower_greater_than_tick_upper() {
 #[test]
 #[should_panic(expected: ('TLM',))]
 fn test_mint_fails_if_tick_lower_less_than_min_tick() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -217,7 +217,7 @@ fn test_mint_fails_if_tick_lower_less_than_min_tick() {
 #[test]
 #[should_panic(expected: ('TUM',))]
 fn test_mint_fails_if_tick_upper_greater_than_max_tick() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -227,7 +227,7 @@ fn test_mint_fails_if_tick_upper_greater_than_max_tick() {
 #[test]
 #[should_panic(expected: ('LO',))]
 fn test_mint_fails_if_amount_exceeds_the_max() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -241,7 +241,7 @@ fn test_mint_fails_if_amount_exceeds_the_max() {
 #[test]
 #[should_panic(expected: ('LO',))]
 fn test_mint_fails_if_total_amount_at_tick_exceeds_the_max() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -271,7 +271,7 @@ fn test_mint_fails_if_total_amount_at_tick_exceeds_the_max() {
 #[test]
 #[should_panic(expected: ('LO',))]
 fn test_mint_fails_if_total_amount_at_tick_exceeds_the_max_1() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -301,7 +301,7 @@ fn test_mint_fails_if_total_amount_at_tick_exceeds_the_max_1() {
 #[test]
 #[should_panic(expected: ('LO',))]
 fn test_mint_fails_if_total_amount_at_tick_exceeds_the_max_2() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -331,7 +331,7 @@ fn test_mint_fails_if_total_amount_at_tick_exceeds_the_max_2() {
 #[test]
 #[should_panic(expected: ('amount must be greater than 0',))]
 fn test_mint_fails_if_amount_is_0() {
-    let pool_address = initialize_pool_10_1();
+    let pool_address = initialize_pool_1_10();
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
@@ -345,7 +345,7 @@ fn test_mint_fails_if_amount_is_0() {
 #[test]
 fn test_mint_succeeds_initial_balances() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -359,7 +359,7 @@ fn test_mint_succeeds_initial_balances() {
 #[test]
 fn test_mint_succeeds_initial_tick() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -369,7 +369,7 @@ fn test_mint_succeeds_initial_tick() {
 #[test]
 fn test_mint_succeeds_above_current_price_transfers_token0_only() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -387,7 +387,7 @@ fn test_mint_succeeds_above_current_price_transfers_token0_only() {
 #[test]
 fn test_mint_succeeds_above_current_price_max_tick_with_max_leverage() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -405,7 +405,7 @@ fn test_mint_succeeds_above_current_price_max_tick_with_max_leverage() {
 #[test]
 fn test_mint_succeeds_above_current_price_works_for_max_tick() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -423,7 +423,7 @@ fn test_mint_succeeds_above_current_price_works_for_max_tick() {
 #[test]
 fn test_mint_succeeds_above_current_price_removing_works() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -443,7 +443,7 @@ fn test_mint_succeeds_above_current_price_removing_works() {
 #[test]
 fn test_mint_succeeds_above_current_price_adds_liquidity_to_liquidity_gross() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -478,7 +478,7 @@ fn test_mint_succeeds_above_current_price_adds_liquidity_to_liquidity_gross() {
 #[test]
 fn test_mint_succeeds_above_current_price_removes_liquidity_from_liquidity_gross() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -498,7 +498,7 @@ fn test_mint_succeeds_above_current_price_removes_liquidity_from_liquidity_gross
 #[test]
 fn test_mint_succeeds_above_current_price_clears_lower_and_upper_tick_if_last_position_is_removed() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -521,7 +521,7 @@ fn test_mint_succeeds_above_current_price_clears_lower_and_upper_tick_if_last_po
 #[test]
 fn test_mint_succeeds_above_current_price_only_clears_tick_that_is_not_used_at_all() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -545,7 +545,7 @@ fn test_mint_succeeds_above_current_price_only_clears_tick_that_is_not_used_at_a
 #[test]
 fn test_mint_succeeds_including_current_price_transfers_both_tokens() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -563,7 +563,7 @@ fn test_mint_succeeds_including_current_price_transfers_both_tokens() {
 #[test]
 fn test_mint_succeeds_including_current_price_initializes_lower_tick() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -577,7 +577,7 @@ fn test_mint_succeeds_including_current_price_initializes_lower_tick() {
 #[test]
 fn test_mint_succeeds_including_current_price_initializes_upper_tick() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -591,7 +591,7 @@ fn test_mint_succeeds_including_current_price_initializes_upper_tick() {
 #[test]
 fn test_mint_succeeds_including_current_price_works_for_min_max_tick() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -609,7 +609,7 @@ fn test_mint_succeeds_including_current_price_works_for_min_max_tick() {
 #[test]
 fn test_mint_succeeds_including_current_price_removing_works() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -629,7 +629,7 @@ fn test_mint_succeeds_including_current_price_removing_works() {
 #[test]
 fn test_mint_succeeds_below_current_price_transfers_token1_only() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -647,7 +647,7 @@ fn test_mint_succeeds_below_current_price_transfers_token1_only() {
 #[test]
 fn test_mint_succeeds_below_current_price_min_tick_with_max_leverage() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -665,7 +665,7 @@ fn test_mint_succeeds_below_current_price_min_tick_with_max_leverage() {
 #[test]
 fn test_mint_succeeds_below_current_price_works_for_min_tick() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -683,7 +683,7 @@ fn test_mint_succeeds_below_current_price_works_for_min_tick() {
 #[test]
 fn test_mint_succeeds_below_current_price_removing_works() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -703,7 +703,7 @@ fn test_mint_succeeds_below_current_price_removing_works() {
 #[test]
 fn test_mint_succeeds_protocol_fees_accumulate_as_expected_during_swap() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -743,7 +743,7 @@ fn test_mint_succeeds_protocol_fees_accumulate_as_expected_during_swap() {
 #[test]
 fn test_mint_succeeds_positions_are_protected_before_protocol_fee_is_turned_on() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
@@ -787,7 +787,7 @@ fn test_mint_succeeds_positions_are_protected_before_protocol_fee_is_turned_on()
 #[should_panic(expected: ('NP',))]
 fn test_mint_succeeds_poke_not_allowed_on_uninitialized_position() {
 
-    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_10_1_with_intial_mint();
+    let (pool_address, pool_mint_test_dispatcher)  = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     
