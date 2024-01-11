@@ -56,7 +56,7 @@ mod PositionComponent {
         
         // @notice Returns the PositionInfo struct of a position, given an owner and position boundaries
         // @param position_key Key variables defining the position
-        // @returns position info
+        // @return position info
         fn get(self: @ComponentState<TContractState>, position_key: PositionKey) -> PositionInfo {
             let position_hash = _get_position_hash(position_key);
             self.positions.read(position_hash)

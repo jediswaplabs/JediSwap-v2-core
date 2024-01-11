@@ -481,8 +481,8 @@ mod JediSwapV2Pool {
         // @param tick_lower The lower tick of the position for which to burn liquidity
         // @param tick_upper The upper tick of the position for which to burn liquidity
         // @param amount How much liquidity to burn
-        // @return amount0 The amount of token0 sent to the recipient
-        // @return amount1 The amount of token1 sent to the recipient
+        // @return The amount of token0 sent to the recipient
+        // @return The amount of token1 sent to the recipient
         fn burn(ref self: ContractState, tick_lower: i32, tick_upper: i32, amount: u128) -> (u256, u256) {
             self._check_and_lock();
             let caller = get_caller_address();
@@ -511,8 +511,8 @@ mod JediSwapV2Pool {
         /// @param sqrt_price_limit_X96 The Q64.96 sqrt price limit. If zero for one, the price cannot be less than this
         /// value after the swap. If one for zero, the price cannot be greater than this value after the swap
         /// @param data Any data to be passed through to the callback
-        /// @return amount0 The delta of the balance of token0 of the pool, exact when negative, minimum when positive
-        /// @return amount1 The delta of the balance of token1 of the pool, exact when negative, minimum when positive
+        /// @return The delta of the balance of token0 of the pool, exact when negative, minimum when positive
+        /// @return The delta of the balance of token1 of the pool, exact when negative, minimum when positive
         fn swap(ref self: ContractState, recipient: ContractAddress, zero_for_one: bool, amount_specified: i256, sqrt_price_limit_X96: u256, data: Array<felt252>) -> (i256, i256) {
             self._check_and_lock();
             assert(amount_specified.is_non_zero(), 'AS');
@@ -748,9 +748,9 @@ mod JediSwapV2Pool {
 
         // @dev Effect some changes to a position
         // @param params the position details and the change to the position's liquidity to effect
-        // @return position_info referencing the position with the given owner and tick range
-        // @return amount0 the amount of token0 owed to the pool, negative if the pool should pay the recipient
-        // @return amount1 the amount of token1 owed to the pool, negative if the pool should pay the recipient
+        // @return referencing the position with the given owner and tick range
+        // @return the amount of token0 owed to the pool, negative if the pool should pay the recipient
+        // @return the amount of token1 owed to the pool, negative if the pool should pay the recipient
         fn _modify_position(ref self: ContractState, params: ModifyPositionParams) -> (PositionInfo, i256, i256) { // How to nodelegatecall TODO
             _check_ticks(params.tick_lower, params.tick_upper);
 
@@ -794,7 +794,7 @@ mod JediSwapV2Pool {
         // @param tick_upper the upper tick of the position's tick range
         // @param liquidity_delta Change in liquidity
         // @param tick the current tick, passed to avoid sloads
-        // @return position_info referencing the position with the given owner and tick range
+        // @return referencing the position with the given owner and tick range
         fn _update_position(ref self: ContractState, owner: ContractAddress, tick_lower: i32, tick_upper: i32, liquidity_delta: i128, tick: i32) -> PositionInfo {
             let fee_growth_global_0_X128 = self.fee_growth_global_0_X128.read();
             let fee_growth_global_1_X128 = self.fee_growth_global_1_X128.read();

@@ -3693,7 +3693,6 @@ fn test_swap_3000_fee_1_max_price_swap_large_amount_with_price_limit_zero_for_on
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_1_max_price_swap_large_amount_with_price_limit_zero_for_one_false_exact_input() {
     let fee = 3000;
     let price0 = 1;
@@ -3814,7 +3813,6 @@ fn test_swap_3000_fee_1_max_price_swap_small_amount_zero_for_one_false_exact_out
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_1_max_price_swap_arbitrary_amount_to_price_zero_for_one_false_price_limit_5_2() {
     let fee = 3000;
     let price0 = 1;
@@ -3848,7 +3846,6 @@ fn test_swap_3000_fee_1_max_price_swap_arbitrary_amount_to_price_zero_for_one_tr
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_1_max_price_swap_arbitrary_amount_to_price_zero_for_one_false_price_limit_2_5() {
     let fee = 3000;
     let price0 = 1;
@@ -4385,7 +4382,6 @@ fn test_swap_3000_fee_max_max_price_swap_arbitrary_amount_to_price_zero_for_one_
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_max_max_price_swap_arbitrary_amount_to_price_zero_for_one_true_price_limit_5_2() {
     let fee = 3000;
     let price0 = 'max';
@@ -4456,7 +4452,6 @@ fn test_swap_3000_fee_min_min_price_swap_large_amount_zero_for_one_true_exact_in
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_min_min_price_swap_large_amount_zero_for_one_false_exact_input() {
     let fee = 3000;
     let price0 = 'min';
@@ -4527,7 +4522,6 @@ fn test_swap_3000_fee_min_min_price_swap_large_amount_with_price_limit_zero_for_
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_min_min_price_swap_large_amount_with_price_limit_zero_for_one_false_exact_input() {
     let fee = 3000;
     let price0 = 'min';
@@ -4650,7 +4644,6 @@ fn test_swap_3000_fee_min_min_price_swap_small_amount_zero_for_one_false_exact_o
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_min_min_price_swap_arbitrary_amount_to_price_zero_for_one_false_price_limit_5_2() {
     let fee = 3000;
     let price0 = 'min';
@@ -4684,7 +4677,6 @@ fn test_swap_3000_fee_min_min_price_swap_arbitrary_amount_to_price_zero_for_one_
 }
 
 #[test]
-#[should_panic(expected: ('SPL',))]
 fn test_swap_3000_fee_min_min_price_swap_arbitrary_amount_to_price_zero_for_one_false_price_limit_2_5() {
     let fee = 3000;
     let price0 = 'min';

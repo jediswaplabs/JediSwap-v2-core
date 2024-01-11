@@ -72,8 +72,8 @@ mod TickComponent {
         // @param tick_current The current tick
         // @param fee_growth_global_0_X128 The all-time global fee growth, per unit of liquidity, in token0
         // @param fee_growth_global_1_X128 The all-time global fee growth, per unit of liquidity, in token1
-        // @return fee_growth_inside_0_X128 The all-time fee growth in token0, per unit of liquidity, inside the position's tick boundaries
-        // @return fee_growth_inside_1_X128 The all-time fee growth in token1, per unit of liquidity, inside the position's tick boundaries
+        // @return The all-time fee growth in token0, per unit of liquidity, inside the position's tick boundaries
+        // @return The all-time fee growth in token1, per unit of liquidity, inside the position's tick boundaries
         fn get_fee_growth_inside(self: @ComponentState<TContractState>, tick_lower: i32, tick_upper: i32, tick_current: i32, fee_growth_global_0_X128: u256, fee_growth_global_1_X128: u256) -> (u256, u256) {
             let lower: TickInfo = self.ticks.read(tick_lower);
             let upper: TickInfo = self.ticks.read(tick_upper);
@@ -115,7 +115,7 @@ mod TickComponent {
         // @param tick_cumulative The tick * time elapsed since the pool was first initialized
         // @param upper true for updating a position's upper tick, or false for updating a position's lower tick
         // @param max_liquidity The maximum liquidity allocation for a single tick
-        // @return flipped Whether the tick was flipped from initialized to uninitialized, or vice versa
+        // @return Whether the tick was flipped from initialized to uninitialized, or vice versa
         fn update(ref self: ComponentState<TContractState>, tick: i32, tick_current: i32, liquidity_delta: i128, fee_growth_global_0_X128: u256, fee_growth_global_1_X128: u256, upper: bool, max_liquidity: u128) -> bool {
             let mut tick_info: TickInfo = self.ticks.read(tick);
 
@@ -161,7 +161,7 @@ mod TickComponent {
         // @param tick The destination tick of the transition
         // @param fee_growth_global_0_X128 The all-time global fee growth, per unit of liquidity, in token0
         // @param fee_growth_global_1_X128 The all-time global fee growth, per unit of liquidity, in token1
-        // @return liquidity_net The amount of liquidity added (subtracted) when tick is crossed from left to right (right to left)
+        // @return The amount of liquidity added (subtracted) when tick is crossed from left to right (right to left)
         fn cross(ref self: ComponentState<TContractState>, tick: i32, fee_growth_global_0_X128: u256, fee_growth_global_1_X128: u256) -> i128 {
             let mut tick_info: TickInfo = self.ticks.read(tick);
             tick_info.fee_growth_outside_0_X128 = fee_growth_global_0_X128 - tick_info.fee_growth_outside_0_X128;
