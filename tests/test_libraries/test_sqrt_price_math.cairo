@@ -1,6 +1,9 @@
 use integer::BoundedInt;
-use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{MAX_UINT160, R96, get_next_sqrt_price_from_input, get_next_sqrt_price_from_output, get_amount0_delta_unsigned, get_amount1_delta_unsigned};
-use yas_core::utils::math_utils::{ pow, FullMath::mul_div, BitShift::BitShiftTrait };
+use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{
+    MAX_UINT160, R96, get_next_sqrt_price_from_input, get_next_sqrt_price_from_output,
+    get_amount0_delta_unsigned, get_amount1_delta_unsigned
+};
+use yas_core::utils::math_utils::{pow, FullMath::mul_div, BitShift::BitShiftTrait};
 use snforge_std::PrintTrait;
 
 fn expand_to_18_decimals(n: u256) -> u256 {
@@ -219,12 +222,12 @@ fn test_get_next_sqrt_price_from_output_output_amount_of_0_dot_1_token0() {
     let amount_out = expand_to_18_decimals(1) / 10;
 
     let next_price = get_next_sqrt_price_from_output(price, liquidity, amount_out, true);
-    
+
     assert(next_price == 71305346262837903834189555302, 'incorrect next_price');
 }
 
 #[test]
-#[should_panic(expected: ('mul_div u256 overflow',))]   // TODO is this correct error?
+#[should_panic(expected: ('mul_div u256 overflow',))] // TODO is this correct error?
 fn test_get_next_sqrt_price_from_output_fails_if_amount_out_is_impossible_in_zero_for_one_direction() {
     let price = 79228162514264337593543950336; // encode_price_sqrt(1, 1);
     let liquidity = 1;
@@ -233,7 +236,7 @@ fn test_get_next_sqrt_price_from_output_fails_if_amount_out_is_impossible_in_zer
 }
 
 #[test]
-#[should_panic(expected: ('u256_mul Overflow',))]   // TODO is this correct error?
+#[should_panic(expected: ('u256_mul Overflow',))] // TODO is this correct error?
 fn test_get_next_sqrt_price_from_output_fails_if_amount_out_is_impossible_in_one_to_zero_direction() {
     let price = 79228162514264337593543950336; // encode_price_sqrt(1, 1);
     let liquidity = 1;
@@ -245,9 +248,11 @@ fn test_get_next_sqrt_price_from_output_fails_if_amount_out_is_impossible_in_one
 fn test_get_amount0_delta_unsigned_returns_0_if_liquidity_is_0() {
     let sqrt_a_x96 = 79228162514264337593543950336; // encode_price_sqrt(1, 1)
     let sqrt_b_x96 = 112045541949572279837463876454; // encode_price_sqrt(2, 1)
-    
-    let amount0 = get_amount0_delta_unsigned(sqrt_a_x96, sqrt_b_x96, 0, true);  // encode_price_sqrt(1, 1), encode_price_sqrt(2, 1);
-    
+
+    let amount0 = get_amount0_delta_unsigned(
+        sqrt_a_x96, sqrt_b_x96, 0, true
+    ); // encode_price_sqrt(1, 1), encode_price_sqrt(2, 1);
+
     assert(amount0 == 0, 'amount0 not 0');
 }
 
@@ -255,8 +260,10 @@ fn test_get_amount0_delta_unsigned_returns_0_if_liquidity_is_0() {
 #[test]
 fn test_get_amount0_delta_unsigned_returns_0_if_prices_are_equal() {
     let sqrt_a_x96 = 79228162514264337593543950336; // encode_price_sqrt(1, 1)
-    
-    let amount0 = get_amount0_delta_unsigned(sqrt_a_x96, sqrt_a_x96, 0, true);    // encode_price_sqrt(1, 1), encode_price_sqrt(1, 1);
+
+    let amount0 = get_amount0_delta_unsigned(
+        sqrt_a_x96, sqrt_a_x96, 0, true
+    ); // encode_price_sqrt(1, 1), encode_price_sqrt(1, 1);
 
     assert(amount0 == 0, 'amount0 not 0');
 }
@@ -265,13 +272,17 @@ fn test_get_amount0_delta_unsigned_returns_0_if_prices_are_equal() {
 fn test_get_amount0_delta_unsigned_returns_0_1_amount1_for_price_of_1_to_1_21() {
     let sqrt_a_x96 = 79228162514264337593543950336; // encode_price_sqrt(1, 1)
     let sqrt_b_x96 = 87150978765690771352898345369; // encode_price_sqrt(121, 100)
-    
-    let amount0 = get_amount0_delta_unsigned(sqrt_a_x96, sqrt_b_x96, expand_to_18_decimals(1).try_into().unwrap(), true);
+
+    let amount0 = get_amount0_delta_unsigned(
+        sqrt_a_x96, sqrt_b_x96, expand_to_18_decimals(1).try_into().unwrap(), true
+    );
 
     assert(amount0 == 90909090909090910, 'incorrect amount0');
 
-    let amount0_rounded_down = get_amount0_delta_unsigned(sqrt_a_x96, sqrt_b_x96, expand_to_18_decimals(1).try_into().unwrap(), false);
-    
+    let amount0_rounded_down = get_amount0_delta_unsigned(
+        sqrt_a_x96, sqrt_b_x96, expand_to_18_decimals(1).try_into().unwrap(), false
+    );
+
     assert(amount0_rounded_down == amount0 - 1, 'incorrect amount0_rounded_down');
 }
 
@@ -280,11 +291,11 @@ fn test_get_amount0_delta_unsigned_works_for_prices_that_overflow() {
     let sqrt_a_x96 = 2787593149816327920953038481947722450866090; // encode_price_sqrt(2 ** 90, 1)
     let sqrt_b_x96 = 22300745198530623480214298539844178181255951; // encode_price_sqrt(2 ** 96, 1)
     let liquidity: u128 = expand_to_18_decimals(1).try_into().unwrap();
-    
+
     let amount_0_up = get_amount0_delta_unsigned(sqrt_a_x96, sqrt_b_x96, liquidity, true);
 
     let amount_0_down = get_amount0_delta_unsigned(sqrt_a_x96, sqrt_b_x96, liquidity, false);
-    
+
     assert(amount_0_up == amount_0_down + 1, 'amount_0_up not amount_0_down+1');
 }
 
@@ -293,18 +304,20 @@ fn test_get_amount0_delta_unsigned_works_for_prices_that_overflow() {
 fn test_get_amount1_delta_unsigned_returns_0_if_liquidity_is_0() {
     let sqrt_a_x96 = 79228162514264337593543950336; // encode_price_sqrt(1, 1)
     let sqrt_b_x96 = 112045541949572279837463876454; // encode_price_sqrt(2, 1)
-    
+
     let amount1 = get_amount1_delta_unsigned(sqrt_a_x96, sqrt_b_x96, 0, true);
-    
+
     assert(amount1 == 0, 'amount1 not 0');
 }
 
 #[test]
 fn test_get_amount1_delta_unsigned_returns_0_if_prices_are_eq() {
     let sqrt_a_x96 = 79228162514264337593543950336; // encode_price_sqrt(1, 1)
-    
-    let amount1 = get_amount1_delta_unsigned(sqrt_a_x96, sqrt_a_x96, expand_to_18_decimals(1).try_into().unwrap(), true);
-    
+
+    let amount1 = get_amount1_delta_unsigned(
+        sqrt_a_x96, sqrt_a_x96, expand_to_18_decimals(1).try_into().unwrap(), true
+    );
+
     assert(amount1 == 0, 'amount1 not 0');
 }
 
@@ -319,7 +332,9 @@ fn test_get_amount1_delta_unsigned_returns_0_1_amount1_for_price_1_to_1_21() {
 
     assert(amount1 == 100000000000000000, 'incorrect amount1');
 
-    let amount1_rounded_down = get_amount1_delta_unsigned(sqrt_a_x96, sqrt_b_x96, expand_to_18_decimals(1).try_into().unwrap(), false);
-    
+    let amount1_rounded_down = get_amount1_delta_unsigned(
+        sqrt_a_x96, sqrt_b_x96, expand_to_18_decimals(1).try_into().unwrap(), false
+    );
+
     assert(amount1_rounded_down == amount1 - 1, 'incorrect amount1_rounded_down');
 }

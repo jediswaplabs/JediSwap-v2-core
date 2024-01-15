@@ -1,7 +1,9 @@
 mod TickMath {
     use integer::BoundedInt;
 
-    use yas_core::numbers::signed_integer::{i32::i32, integer_trait::IntegerTrait, i256::{i256, bitwise_or}};
+    use yas_core::numbers::signed_integer::{
+        i32::i32, integer_trait::IntegerTrait, i256::{i256, bitwise_or}
+    };
     use yas_core::utils::math_utils::BitShift::BitShiftTrait;
 
     impl i256TryIntoi32 of TryInto<i256, i32> {
@@ -98,7 +100,6 @@ mod TickMath {
             ratio = (ratio * 0x48a170391f7dc42444e8fa2).shr(128)
         };
 
-
         if (tick > IntegerTrait::<i32>::new(0, false)) {
             ratio = BoundedInt::max() / ratio;
         }
@@ -130,7 +131,10 @@ mod TickMath {
     // @return The greatest tick for which the ratio is less than or equal to the input ratio
     fn get_tick_at_sqrt_ratio(sqrt_price_x96: u256) -> i32 {
         // second inequality must be < because the price can never reach the price at the max tick
-        assert(sqrt_price_x96 >= MIN_SQRT_RATIO && sqrt_price_x96 < MAX_SQRT_RATIO, 'Invalid sqrt ratio');
+        assert(
+            sqrt_price_x96 >= MIN_SQRT_RATIO && sqrt_price_x96 < MAX_SQRT_RATIO,
+            'Invalid sqrt ratio'
+        );
         let ratio = sqrt_price_x96.shl(32);
         let mut r = ratio.clone();
         let mut msb = 0;
@@ -172,7 +176,9 @@ mod TickMath {
             r = ratio.shl(127 - msb)
         }
 
-        let mut log_2: i256 = (IntegerTrait::<i256>::new(msb, false) - IntegerTrait::<i256>::new(128, false)).shl(IntegerTrait::<i256>::new(64, false));
+        let mut log_2: i256 = (IntegerTrait::<i256>::new(msb, false)
+            - IntegerTrait::<i256>::new(128, false))
+            .shl(IntegerTrait::<i256>::new(64, false));
 
         r = (r * r).shr(127);
         let f = r.shr(128);

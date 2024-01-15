@@ -63,12 +63,16 @@ struct SwapSteps {
 
 #[starknet::interface]
 trait IJediSwapV2MintCallback<T> {
-    fn jediswap_v2_mint_callback(ref self: T, amount0_owed: u256, amount1_owed: u256, callback_data_span: Span<felt252>);
+    fn jediswap_v2_mint_callback(
+        ref self: T, amount0_owed: u256, amount1_owed: u256, callback_data_span: Span<felt252>
+    );
 }
 
 #[starknet::interface]
 trait IJediSwapV2SwapCallback<T> {
-    fn jediswap_v2_swap_callback(ref self: T,  amount0_delta: i256, amount1_delta: i256, callback_data_span: Span<felt252>);
+    fn jediswap_v2_swap_callback(
+        ref self: T, amount0_delta: i256, amount1_delta: i256, callback_data_span: Span<felt252>
+    );
 }
 
 #[starknet::interface]
@@ -88,33 +92,83 @@ trait IJediSwapV2Pool<TContractState> {
     fn get_liquidity(self: @TContractState) -> u128;
     fn get_tick_info(self: @TContractState, tick: i32) -> TickInfo;
     fn get_position_info(self: @TContractState, position_key: PositionKey) -> PositionInfo;
-    fn static_collect(self: @TContractState, owner: ContractAddress, tick_lower: i32, tick_upper: i32, amount0_requested: u128, amount1_requested: u128) -> (u128, u128);
-    
+    fn static_collect(
+        self: @TContractState,
+        owner: ContractAddress,
+        tick_lower: i32,
+        tick_upper: i32,
+        amount0_requested: u128,
+        amount1_requested: u128
+    ) -> (u128, u128);
+
     fn initialize(ref self: TContractState, sqrt_price_X96: u256);
-    fn mint(ref self: TContractState, recipient: ContractAddress, tick_lower: i32, tick_upper: i32, amount: u128, data: Array<felt252>) -> (u256, u256);
-    fn collect(ref self: TContractState, recipient: ContractAddress, tick_lower: i32, tick_upper: i32, amount0_requested: u128, amount1_requested: u128) -> (u128, u128);
-    fn burn(ref self: TContractState, tick_lower: i32, tick_upper: i32, amount: u128) -> (u256, u256);
-    fn swap(ref self: TContractState, recipient: ContractAddress, zero_for_one: bool, amount_specified: i256, sqrt_price_limit_X96: u256, data: Array<felt252>) -> (i256, i256);
-    fn collect_protocol(ref self: TContractState, recipient: ContractAddress, amount0_requested: u128, amount1_requested: u128) -> (u128, u128);
+    fn mint(
+        ref self: TContractState,
+        recipient: ContractAddress,
+        tick_lower: i32,
+        tick_upper: i32,
+        amount: u128,
+        data: Array<felt252>
+    ) -> (u256, u256);
+    fn collect(
+        ref self: TContractState,
+        recipient: ContractAddress,
+        tick_lower: i32,
+        tick_upper: i32,
+        amount0_requested: u128,
+        amount1_requested: u128
+    ) -> (u128, u128);
+    fn burn(
+        ref self: TContractState, tick_lower: i32, tick_upper: i32, amount: u128
+    ) -> (u256, u256);
+    fn swap(
+        ref self: TContractState,
+        recipient: ContractAddress,
+        zero_for_one: bool,
+        amount_specified: i256,
+        sqrt_price_limit_X96: u256,
+        data: Array<felt252>
+    ) -> (i256, i256);
+    fn collect_protocol(
+        ref self: TContractState,
+        recipient: ContractAddress,
+        amount0_requested: u128,
+        amount1_requested: u128
+    ) -> (u128, u128);
 }
 
 #[starknet::contract]
 mod JediSwapV2Pool {
     use jediswap_v2_core::jediswap_v2_pool::IJediSwapV2Pool;
-    use super::{ProtocolFees, ModifyPositionParams, SwapState, SwapSteps, IJediSwapV2MintCallbackDispatcher, IJediSwapV2MintCallbackDispatcherTrait, IJediSwapV2SwapCallbackDispatcher, IJediSwapV2SwapCallbackDispatcherTrait};
+    use super::{
+        ProtocolFees, ModifyPositionParams, SwapState, SwapSteps, IJediSwapV2MintCallbackDispatcher,
+        IJediSwapV2MintCallbackDispatcherTrait, IJediSwapV2SwapCallbackDispatcher,
+        IJediSwapV2SwapCallbackDispatcherTrait
+    };
 
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address, get_contract_address};
 
-    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait, IERC20CamelDispatcher, IERC20CamelDispatcherTrait};
+    use openzeppelin::token::erc20::interface::{
+        IERC20Dispatcher, IERC20DispatcherTrait, IERC20CamelDispatcher, IERC20CamelDispatcherTrait
+    };
     use openzeppelin::access::ownable::interface::{IOwnableDispatcher, IOwnableDispatcherTrait};
     use jediswap_v2_core::libraries::position::{PositionComponent, PositionKey, PositionInfo};
-    use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{Q128, get_amount0_delta, get_amount1_delta};
+    use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{
+        Q128, get_amount0_delta, get_amount1_delta
+    };
     use jediswap_v2_core::libraries::swap_math::SwapMath::compute_swap_step;
     use jediswap_v2_core::libraries::tick::{TickComponent, TickInfo};
     use jediswap_v2_core::libraries::tick_bitmap::TickBitmapComponent;
-    use jediswap_v2_core::libraries::tick_math::TickMath::{get_tick_at_sqrt_ratio, get_sqrt_ratio_at_tick, MIN_TICK, MAX_TICK};
-    use jediswap_v2_core::jediswap_v2_factory::{IJediSwapV2FactoryDispatcher, IJediSwapV2FactoryDispatcherTrait};
-    use yas_core::numbers::signed_integer::{i32::i32, i64::i64, i128::{i128, u128Intoi128}, i256::{i256, i256TryIntou256}, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::tick_math::TickMath::{
+        get_tick_at_sqrt_ratio, get_sqrt_ratio_at_tick, MIN_TICK, MAX_TICK
+    };
+    use jediswap_v2_core::jediswap_v2_factory::{
+        IJediSwapV2FactoryDispatcher, IJediSwapV2FactoryDispatcherTrait
+    };
+    use yas_core::numbers::signed_integer::{
+        i32::i32, i64::i64, i128::{i128, u128Intoi128}, i256::{i256, i256TryIntou256},
+        integer_trait::IntegerTrait
+    };
     use yas_core::utils::math_utils::FullMath::mul_div;
     use yas_core::utils::math_utils::BitShift::BitShiftTrait;
 
@@ -242,22 +296,21 @@ mod JediSwapV2Pool {
 
     #[storage]
     struct Storage {
-        factory: ContractAddress,   // @notice The contract that deployed the pool, which must adhere to the IJediSwapV2Factory interface
-        token0: ContractAddress,    // @notice The first of the two tokens of the pool, sorted by address
-        token1: ContractAddress,    // @notice The second of the two tokens of the pool, sorted by address
-        fee: u32,                   // @notice The pool's fee in hundredths of a bip, i.e. 1e-6
-        tick_spacing: u32,          // @notice The pool tick spacing
-        max_liquidity_per_tick: u128,   // @notice The maximum amount of position liquidity that can use any tick in the range
-        sqrt_price_X96: u256,       // @notice The current price of the pool as a sqrt(token1/token0) Q64.96 value
-        tick: i32,                  // @notice The current tick of the pool, i.e. according to the last tick transition that was run.
-                                    // This value may not always be equal to SqrtTickMath.getTickAtSqrtRatio(sqrtPriceX96) if the price is on a tick
-                                    // boundary.
-        unlocked: bool,             // @notice Whether the pool is currently locked to reentrancy
+        factory: ContractAddress, // @notice The contract that deployed the pool, which must adhere to the IJediSwapV2Factory interface
+        token0: ContractAddress, // @notice The first of the two tokens of the pool, sorted by address
+        token1: ContractAddress, // @notice The second of the two tokens of the pool, sorted by address
+        fee: u32, // @notice The pool's fee in hundredths of a bip, i.e. 1e-6
+        tick_spacing: u32, // @notice The pool tick spacing
+        max_liquidity_per_tick: u128, // @notice The maximum amount of position liquidity that can use any tick in the range
+        sqrt_price_X96: u256, // @notice The current price of the pool as a sqrt(token1/token0) Q64.96 value
+        tick: i32, // @notice The current tick of the pool, i.e. according to the last tick transition that was run.
+        // This value may not always be equal to SqrtTickMath.getTickAtSqrtRatio(sqrtPriceX96) if the price is on a tick
+        // boundary.
+        unlocked: bool, // @notice Whether the pool is currently locked to reentrancy
         fee_growth_global_0_X128: u256, // @notice The fee growth as a Q128.128 fees of token0 collected per unit of liquidity for the entire life of the pool
         fee_growth_global_1_X128: u256, // @notice The fee growth as a Q128.128 fees of token1 collected per unit of liquidity for the entire life of the pool
-        protocol_fees: ProtocolFees,    // @notice The amounts of token0 and token1 that are owed to the protocol
-        liquidity: u128,            // @notice The currently in range liquidity available to the pool
-
+        protocol_fees: ProtocolFees, // @notice The amounts of token0 and token1 that are owed to the protocol
+        liquidity: u128, // @notice The currently in range liquidity available to the pool
         #[substorage(v0)]
         position_storage: PositionComponent::Storage,
         #[substorage(v0)]
@@ -267,19 +320,26 @@ mod JediSwapV2Pool {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, token0: ContractAddress, token1: ContractAddress, fee: u32, tick_spacing: u32) {
+    fn constructor(
+        ref self: ContractState,
+        token0: ContractAddress,
+        token1: ContractAddress,
+        fee: u32,
+        tick_spacing: u32
+    ) {
         let factory = get_caller_address();
         self.factory.write(factory);
         self.token0.write(token0);
         self.token1.write(token1);
         self.fee.write(fee);
         self.tick_spacing.write(tick_spacing);
-        self.max_liquidity_per_tick.write(self.tick_storage.tick_spacing_to_max_liquidity_per_tick(tick_spacing));
+        self
+            .max_liquidity_per_tick
+            .write(self.tick_storage.tick_spacing_to_max_liquidity_per_tick(tick_spacing));
     }
 
     #[external(v0)]
     impl JediSwapV2PoolImpl of super::IJediSwapV2Pool<ContractState> {
-
         fn get_factory(self: @ContractState) -> ContractAddress {
             self.factory.read()
         }
@@ -307,13 +367,15 @@ mod JediSwapV2Pool {
         fn get_sqrt_price_X96(self: @ContractState) -> u256 {
             self.sqrt_price_X96.read()
         }
-        
+
         fn get_tick(self: @ContractState) -> i32 {
             self.tick.read()
         }
-        
+
         fn get_fee_protocol(self: @ContractState) -> u8 {
-            let factory_dispatcher = IJediSwapV2FactoryDispatcher {contract_address: self.factory.read()};
+            let factory_dispatcher = IJediSwapV2FactoryDispatcher {
+                contract_address: self.factory.read()
+            };
             factory_dispatcher.get_fee_protocol()
         }
 
@@ -344,10 +406,17 @@ mod JediSwapV2Pool {
         // @notice Read method for collect
         // @return The amount of fees to collect in token0
         // @return The amount of fees to collect in token1
-        fn static_collect(self: @ContractState, owner: ContractAddress, tick_lower: i32, tick_upper: i32, amount0_requested: u128, amount1_requested: u128) -> (u128, u128) {
-            let position_key = PositionKey {owner, tick_lower, tick_upper};
+        fn static_collect(
+            self: @ContractState,
+            owner: ContractAddress,
+            tick_lower: i32,
+            tick_upper: i32,
+            amount0_requested: u128,
+            amount1_requested: u128
+        ) -> (u128, u128) {
+            let position_key = PositionKey { owner, tick_lower, tick_upper };
             let mut position = self.position_storage.get(position_key);
-            
+
             let amount0 = if (amount0_requested > position.tokens_owed_0) {
                 position.tokens_owed_0
             } else {
@@ -389,11 +458,23 @@ mod JediSwapV2Pool {
         // @param data Any data that should be passed through to the callback
         // @return The amount of token0 that was paid to mint the given amount of liquidity. Matches the value in the callback
         // @return The amount of token1 that was paid to mint the given amount of liquidity. Matches the value in the callback
-        fn mint(ref self: ContractState, recipient: ContractAddress, tick_lower: i32, tick_upper: i32, amount: u128, data: Array<felt252>) -> (u256, u256) {
+        fn mint(
+            ref self: ContractState,
+            recipient: ContractAddress,
+            tick_lower: i32,
+            tick_upper: i32,
+            amount: u128,
+            data: Array<felt252>
+        ) -> (u256, u256) {
             self._check_and_lock();
 
             assert(amount > 0, 'amount must be greater than 0');
-            let (_, amount0, amount1) = self._modify_position(ModifyPositionParams {owner: recipient, tick_lower, tick_upper, liquidity_delta: amount.into()});
+            let (_, amount0, amount1) = self
+                ._modify_position(
+                    ModifyPositionParams {
+                        owner: recipient, tick_lower, tick_upper, liquidity_delta: amount.into()
+                    }
+                );
 
             let amount0: u256 = amount0.try_into().unwrap();
             let amount1: u256 = amount1.try_into().unwrap();
@@ -408,8 +489,10 @@ mod JediSwapV2Pool {
             }
 
             let callback_contract = get_caller_address();
-            
-            let callback_dispatcher = IJediSwapV2MintCallbackDispatcher { contract_address: callback_contract }; // TODO
+
+            let callback_dispatcher = IJediSwapV2MintCallbackDispatcher {
+                contract_address: callback_contract
+            }; // TODO
             callback_dispatcher.jediswap_v2_mint_callback(amount0, amount1, data.span());
 
             if (amount0 > 0) {
@@ -420,7 +503,18 @@ mod JediSwapV2Pool {
                 assert(balance1_before + amount1 <= self.balance1(), 'M1');
             }
 
-            self.emit(Mint {sender: get_caller_address(), owner: recipient, tick_lower, tick_upper, amount, amount0, amount1});
+            self
+                .emit(
+                    Mint {
+                        sender: get_caller_address(),
+                        owner: recipient,
+                        tick_lower,
+                        tick_upper,
+                        amount,
+                        amount0,
+                        amount1
+                    }
+                );
             self._unlock();
             (amount0, amount1)
         }
@@ -437,13 +531,20 @@ mod JediSwapV2Pool {
         // @param amount1_requested How much token1 should be withdrawn from the fees owed
         // @return The amount of fees collected in token0
         // @return The amount of fees collected in token1
-        fn collect(ref self: ContractState, recipient: ContractAddress, tick_lower: i32, tick_upper: i32, amount0_requested: u128, amount1_requested: u128) -> (u128, u128) {
+        fn collect(
+            ref self: ContractState,
+            recipient: ContractAddress,
+            tick_lower: i32,
+            tick_upper: i32,
+            amount0_requested: u128,
+            amount1_requested: u128
+        ) -> (u128, u128) {
             self._check_and_lock();
             // we don't need to _check_ticks here, because invalid positions will never have non-zero tokens_owed_{0,1}
             let caller = get_caller_address();
-            let position_key = PositionKey {owner: caller, tick_lower, tick_upper};
+            let position_key = PositionKey { owner: caller, tick_lower, tick_upper };
             let mut position = self.position_storage.get(position_key);
-            
+
             let amount0 = if (amount0_requested > position.tokens_owed_0) {
                 position.tokens_owed_0
             } else {
@@ -467,7 +568,10 @@ mod JediSwapV2Pool {
                 let token_dispatcher = IERC20Dispatcher { contract_address: self.token1.read() };
                 token_dispatcher.transfer(recipient, amount1.into());
             }
-            self.emit(Collect {owner: caller, recipient, tick_lower, tick_upper, amount0, amount1});
+            self
+                .emit(
+                    Collect { owner: caller, recipient, tick_lower, tick_upper, amount0, amount1 }
+                );
             self._unlock();
             (amount0, amount1)
         }
@@ -480,22 +584,29 @@ mod JediSwapV2Pool {
         // @param amount How much liquidity to burn
         // @return The amount of token0 sent to the recipient
         // @return The amount of token1 sent to the recipient
-        fn burn(ref self: ContractState, tick_lower: i32, tick_upper: i32, amount: u128) -> (u256, u256) {
+        fn burn(
+            ref self: ContractState, tick_lower: i32, tick_upper: i32, amount: u128
+        ) -> (u256, u256) {
             self._check_and_lock();
             let caller = get_caller_address();
-            let (mut position, amount0_i, amount1_i) = self._modify_position(ModifyPositionParams {owner: caller, tick_lower, tick_upper, liquidity_delta: -amount.into()});
-            
+            let (mut position, amount0_i, amount1_i) = self
+                ._modify_position(
+                    ModifyPositionParams {
+                        owner: caller, tick_lower, tick_upper, liquidity_delta: -amount.into()
+                    }
+                );
+
             let amount0 = amount0_i.mag;
             let amount1 = amount1_i.mag;
-            
-            if (amount0 > 0 || amount1 > 0 ) {
+
+            if (amount0 > 0 || amount1 > 0) {
                 position.tokens_owed_0 += amount0.try_into().unwrap();
                 position.tokens_owed_1 += amount1.try_into().unwrap();
-                let position_key = PositionKey {owner: caller, tick_lower, tick_upper};
+                let position_key = PositionKey { owner: caller, tick_lower, tick_upper };
                 self.position_storage.set(position_key, position);
             }
-            
-            self.emit(Burn {owner: caller, tick_lower, tick_upper, amount, amount0, amount1});
+
+            self.emit(Burn { owner: caller, tick_lower, tick_upper, amount, amount0, amount1 });
             self._unlock();
             (amount0, amount1)
         }
@@ -510,7 +621,14 @@ mod JediSwapV2Pool {
         // @param data Any data to be passed through to the callback
         // @return The delta of the balance of token0 of the pool, exact when negative, minimum when positive
         // @return The delta of the balance of token1 of the pool, exact when negative, minimum when positive
-        fn swap(ref self: ContractState, recipient: ContractAddress, zero_for_one: bool, amount_specified: i256, sqrt_price_limit_X96: u256, data: Array<felt252>) -> (i256, i256) {
+        fn swap(
+            ref self: ContractState,
+            recipient: ContractAddress,
+            zero_for_one: bool,
+            amount_specified: i256,
+            sqrt_price_limit_X96: u256,
+            data: Array<felt252>
+        ) -> (i256, i256) {
             self._check_and_lock();
             assert(amount_specified.is_non_zero(), 'AS');
 
@@ -547,16 +665,29 @@ mod JediSwapV2Pool {
                 liquidity: liquidity_start
             };
 
-            let mut step = SwapSteps{sqrt_price_start_X96: 0, tick_next: Zeroable::zero(), initialized: false, sqrt_price_next_X96: 0, amount_in: 0, amount_out: 0, fee_amount: 0};
+            let mut step = SwapSteps {
+                sqrt_price_start_X96: 0,
+                tick_next: Zeroable::zero(),
+                initialized: false,
+                sqrt_price_next_X96: 0,
+                amount_in: 0,
+                amount_out: 0,
+                fee_amount: 0
+            };
 
             loop {
                 // continue as long as we haven't used the entire input/output and haven't reached the price limit
-                if (state.amount_specified_remaining.is_zero() || state.sqrt_price_X96 == sqrt_price_limit_X96) {
+                if (state.amount_specified_remaining.is_zero()
+                    || state.sqrt_price_X96 == sqrt_price_limit_X96) {
                     break true;
                 }
 
                 step.sqrt_price_start_X96 = state.sqrt_price_X96;
-                let (step_tick_next, step_initialized) = self.tick_bitmap_storage.next_initialized_tick_within_one_word(state.tick, self.tick_spacing.read(), zero_for_one);
+                let (step_tick_next, step_initialized) = self
+                    .tick_bitmap_storage
+                    .next_initialized_tick_within_one_word(
+                        state.tick, self.tick_spacing.read(), zero_for_one
+                    );
                 step.tick_next = step_tick_next;
                 step.initialized = step_initialized;
 
@@ -570,14 +701,26 @@ mod JediSwapV2Pool {
                 // get the price for the next tick
                 step.sqrt_price_next_X96 = get_sqrt_ratio_at_tick(step.tick_next);
 
-                let (state_sqrt_price_X96, step_amount_in, step_amount_out, step_fee_amount) = compute_swap_step(state.sqrt_price_X96, 
-                                                                                            if (zero_for_one) { if (step.sqrt_price_next_X96 < sqrt_price_limit_X96) {
-                                                                                                sqrt_price_limit_X96
-                                                                                            } else { step.sqrt_price_next_X96}} else {
-                                                                                               if (step.sqrt_price_next_X96 > sqrt_price_limit_X96) {
-                                                                                                sqrt_price_limit_X96
-                                                                                               } else { step.sqrt_price_next_X96}
-                                                                                            }, state.liquidity, state.amount_specified_remaining, self.fee.read());
+                let (state_sqrt_price_X96, step_amount_in, step_amount_out, step_fee_amount) =
+                    compute_swap_step(
+                    state.sqrt_price_X96,
+                    if (zero_for_one) {
+                        if (step.sqrt_price_next_X96 < sqrt_price_limit_X96) {
+                            sqrt_price_limit_X96
+                        } else {
+                            step.sqrt_price_next_X96
+                        }
+                    } else {
+                        if (step.sqrt_price_next_X96 > sqrt_price_limit_X96) {
+                            sqrt_price_limit_X96
+                        } else {
+                            step.sqrt_price_next_X96
+                        }
+                    },
+                    state.liquidity,
+                    state.amount_specified_remaining,
+                    self.fee.read()
+                );
                 state.sqrt_price_X96 = state_sqrt_price_X96;
                 step.amount_in = step_amount_in;
                 step.amount_out = step_amount_out;
@@ -600,27 +743,51 @@ mod JediSwapV2Pool {
 
                 // update global fee tracker
                 if (state.liquidity > 0) {
-                    state.fee_growth_global_X128 += mul_div(step.fee_amount, Q128, state.liquidity.into());
+                    state
+                        .fee_growth_global_X128 +=
+                            mul_div(step.fee_amount, Q128, state.liquidity.into());
                 }
 
                 // shift tick if we reached the next price
                 if (state.sqrt_price_X96 == step.sqrt_price_next_X96) {
                     // if the tick is initialized, run the tick transition
                     if (step.initialized) {
-                        let mut liquidity_net = self.tick_storage.cross(step.tick_next, if (zero_for_one) { state.fee_growth_global_X128} else {self.fee_growth_global_0_X128.read()}, if (zero_for_one) { self.fee_growth_global_1_X128.read()} else {state.fee_growth_global_X128});
+                        let mut liquidity_net = self
+                            .tick_storage
+                            .cross(
+                                step.tick_next,
+                                if (zero_for_one) {
+                                    state.fee_growth_global_X128
+                                } else {
+                                    self.fee_growth_global_0_X128.read()
+                                },
+                                if (zero_for_one) {
+                                    self.fee_growth_global_1_X128.read()
+                                } else {
+                                    state.fee_growth_global_X128
+                                }
+                            );
 
                         // if we're moving leftward, we interpret liquidityNet as the opposite sign
                         if (zero_for_one) {
                             liquidity_net = -liquidity_net;
                         }
 
-                        state.liquidity = if (liquidity_net < IntegerTrait::<i128>::new(0, false)) {
-                            state.liquidity - liquidity_net.mag
-                        } else {
-                            state.liquidity + liquidity_net.mag
-                        };
+                        state
+                            .liquidity =
+                                if (liquidity_net < IntegerTrait::<i128>::new(0, false)) {
+                                    state.liquidity - liquidity_net.mag
+                                } else {
+                                    state.liquidity + liquidity_net.mag
+                                };
                     }
-                    state.tick = if (zero_for_one) { step.tick_next - IntegerTrait::<i32>::new(1, false) } else { step.tick_next };
+                    state
+                        .tick =
+                            if (zero_for_one) {
+                                step.tick_next - IntegerTrait::<i32>::new(1, false)
+                            } else {
+                                step.tick_next
+                            };
                 } else if (state.sqrt_price_X96 != step.sqrt_price_start_X96) {
                     // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
                     state.tick = get_tick_at_sqrt_ratio(state.sqrt_price_X96);
@@ -665,33 +832,52 @@ mod JediSwapV2Pool {
             // do the transfers and collect payment
             if (zero_for_one) {
                 if (amount1 < Zeroable::zero()) {
-                    let token_dispatcher = IERC20Dispatcher { contract_address: self.token1.read() };
+                    let token_dispatcher = IERC20Dispatcher {
+                        contract_address: self.token1.read()
+                    };
                     token_dispatcher.transfer(recipient, amount1.mag);
                 };
 
                 let balance0_before: u256 = self.balance0();
 
                 let callback_contract = get_caller_address();
-                let callback_dispatcher = IJediSwapV2SwapCallbackDispatcher { contract_address: callback_contract };
+                let callback_dispatcher = IJediSwapV2SwapCallbackDispatcher {
+                    contract_address: callback_contract
+                };
                 callback_dispatcher.jediswap_v2_swap_callback(amount0, amount1, data.span());
 
                 assert(balance0_before + amount0.mag <= self.balance0(), 'IIA');
             } else {
                 if (amount0 < Zeroable::zero()) {
-                    let token_dispatcher = IERC20Dispatcher { contract_address: self.token0.read() };
+                    let token_dispatcher = IERC20Dispatcher {
+                        contract_address: self.token0.read()
+                    };
                     token_dispatcher.transfer(recipient, amount0.mag);
                 }
 
                 let balance1_before: u256 = self.balance1();
 
                 let callback_contract = get_caller_address();
-                let callback_dispatcher = IJediSwapV2SwapCallbackDispatcher { contract_address: callback_contract };
+                let callback_dispatcher = IJediSwapV2SwapCallbackDispatcher {
+                    contract_address: callback_contract
+                };
                 callback_dispatcher.jediswap_v2_swap_callback(amount0, amount1, data.span());
 
                 assert(balance1_before + amount1.mag <= self.balance1(), 'IIA');
             }
 
-            self.emit(Swap {sender: get_caller_address(), recipient, amount0, amount1, sqrt_price_X96: state.sqrt_price_X96, liquidity: state.liquidity, tick: state.tick});
+            self
+                .emit(
+                    Swap {
+                        sender: get_caller_address(),
+                        recipient,
+                        amount0,
+                        amount1,
+                        sqrt_price_X96: state.sqrt_price_X96,
+                        liquidity: state.liquidity,
+                        tick: state.tick
+                    }
+                );
             self._unlock();
             (amount0, amount1)
         }
@@ -703,7 +889,12 @@ mod JediSwapV2Pool {
         // @param amount1_requested The maximum amount of token1 to send, can be 0 to collect fees in only token0
         // @return The protocol fee collected in token0
         // @return The protocol fee collected in token1
-        fn collect_protocol(ref self: ContractState, recipient: ContractAddress, amount0_requested: u128, amount1_requested: u128) -> (u128, u128) {
+        fn collect_protocol(
+            ref self: ContractState,
+            recipient: ContractAddress,
+            amount0_requested: u128,
+            amount1_requested: u128
+        ) -> (u128, u128) {
             self._check_and_lock();
             let caller = get_caller_address();
             let ownable_dispatcher = IOwnableDispatcher { contract_address: self.factory.read() };
@@ -711,13 +902,13 @@ mod JediSwapV2Pool {
 
             let mut protocol_fees = self.protocol_fees.read();
 
-            let mut amount0 = if(amount0_requested > protocol_fees.token0) {
+            let mut amount0 = if (amount0_requested > protocol_fees.token0) {
                 protocol_fees.token0
             } else {
                 amount0_requested
             };
 
-            let mut amount1 = if(amount1_requested > protocol_fees.token1) {
+            let mut amount1 = if (amount1_requested > protocol_fees.token1) {
                 protocol_fees.token1
             } else {
                 amount1_requested
@@ -736,25 +927,29 @@ mod JediSwapV2Pool {
             }
             self.protocol_fees.write(protocol_fees);
             self.emit(CollectProtocol { sender: caller, recipient, amount0, amount1 });
-            
+
             (amount0, amount1)
         }
     }
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
-
         // @dev Effect some changes to a position
         // @param params the position details and the change to the position's liquidity to effect
         // @return referencing the position with the given owner and tick range
         // @return the amount of token0 owed to the pool, negative if the pool should pay the recipient
         // @return the amount of token1 owed to the pool, negative if the pool should pay the recipient
-        fn _modify_position(ref self: ContractState, params: ModifyPositionParams) -> (PositionInfo, i256, i256) { // How to nodelegatecall TODO
+        fn _modify_position(
+            ref self: ContractState, params: ModifyPositionParams
+        ) -> (PositionInfo, i256, i256) { // How to nodelegatecall TODO
             _check_ticks(params.tick_lower, params.tick_upper);
 
             let tick = self.tick.read();
             let sqrt_price_X96 = self.sqrt_price_X96.read();
-            let position = self._update_position(params.owner, params.tick_lower, params.tick_upper, params.liquidity_delta, tick);
+            let position = self
+                ._update_position(
+                    params.owner, params.tick_lower, params.tick_upper, params.liquidity_delta, tick
+                );
 
             let mut amount0 = Zeroable::zero();
             let mut amount1 = Zeroable::zero();
@@ -762,25 +957,44 @@ mod JediSwapV2Pool {
                 if (tick < params.tick_lower) {
                     // current tick is below the passed range; liquidity can only become in range by crossing from left to
                     // right, when we'll need _more_ token0 (it's becoming more valuable) so user must provide it
-                    amount0 = get_amount0_delta(get_sqrt_ratio_at_tick(params.tick_lower), get_sqrt_ratio_at_tick(params.tick_upper), params.liquidity_delta);
+                    amount0 =
+                        get_amount0_delta(
+                            get_sqrt_ratio_at_tick(params.tick_lower),
+                            get_sqrt_ratio_at_tick(params.tick_upper),
+                            params.liquidity_delta
+                        );
                 } else if (tick < params.tick_upper) {
                     // current tick is inside the passed range
-                    amount0 = get_amount0_delta(sqrt_price_X96, get_sqrt_ratio_at_tick(params.tick_upper), params.liquidity_delta);
+                    amount0 =
+                        get_amount0_delta(
+                            sqrt_price_X96,
+                            get_sqrt_ratio_at_tick(params.tick_upper),
+                            params.liquidity_delta
+                        );
 
-                    amount1 = get_amount1_delta(get_sqrt_ratio_at_tick(params.tick_lower), sqrt_price_X96, params.liquidity_delta);
+                    amount1 =
+                        get_amount1_delta(
+                            get_sqrt_ratio_at_tick(params.tick_lower),
+                            sqrt_price_X96,
+                            params.liquidity_delta
+                        );
 
                     let mut liquidity = self.liquidity.read();
                     if (params.liquidity_delta < Zeroable::zero()) {
                         liquidity = liquidity - params.liquidity_delta.mag;
-                    }
-                    else {
+                    } else {
                         liquidity = liquidity + params.liquidity_delta.mag;
                     }
                     self.liquidity.write(liquidity);
                 } else {
                     // current tick is above the passed range; liquidity can only become in range by crossing from right to
                     // left, when we'll need _more_ token1 (it's becoming more valuable) so user must provide it
-                    amount1 = get_amount1_delta(get_sqrt_ratio_at_tick(params.tick_lower), get_sqrt_ratio_at_tick(params.tick_upper), params.liquidity_delta);
+                    amount1 =
+                        get_amount1_delta(
+                            get_sqrt_ratio_at_tick(params.tick_lower),
+                            get_sqrt_ratio_at_tick(params.tick_upper),
+                            params.liquidity_delta
+                        );
                 }
             }
             (position, amount0, amount1)
@@ -793,7 +1007,14 @@ mod JediSwapV2Pool {
         // @param liquidity_delta Change in liquidity
         // @param tick the current tick, passed to avoid sloads
         // @return referencing the position with the given owner and tick range
-        fn _update_position(ref self: ContractState, owner: ContractAddress, tick_lower: i32, tick_upper: i32, liquidity_delta: i128, tick: i32) -> PositionInfo {
+        fn _update_position(
+            ref self: ContractState,
+            owner: ContractAddress,
+            tick_lower: i32,
+            tick_upper: i32,
+            liquidity_delta: i128,
+            tick: i32
+        ) -> PositionInfo {
             let fee_growth_global_0_X128 = self.fee_growth_global_0_X128.read();
             let fee_growth_global_1_X128 = self.fee_growth_global_1_X128.read();
 
@@ -804,12 +1025,31 @@ mod JediSwapV2Pool {
             let mut flipped_upper = false;
 
             if (liquidity_delta != Zeroable::zero()) {
-                
-                flipped_lower = self.tick_storage.update(tick_lower, tick, liquidity_delta, fee_growth_global_0_X128, fee_growth_global_1_X128, false, max_liquidity_per_tick);
-                
-                flipped_upper = self.tick_storage.update(tick_upper, tick, liquidity_delta, fee_growth_global_0_X128, fee_growth_global_1_X128, true, max_liquidity_per_tick);                
+                flipped_lower = self
+                    .tick_storage
+                    .update(
+                        tick_lower,
+                        tick,
+                        liquidity_delta,
+                        fee_growth_global_0_X128,
+                        fee_growth_global_1_X128,
+                        false,
+                        max_liquidity_per_tick
+                    );
+
+                flipped_upper = self
+                    .tick_storage
+                    .update(
+                        tick_upper,
+                        tick,
+                        liquidity_delta,
+                        fee_growth_global_0_X128,
+                        fee_growth_global_1_X128,
+                        true,
+                        max_liquidity_per_tick
+                    );
             }
-            
+
             if (flipped_lower) {
                 self.tick_bitmap_storage.flip_tick(tick_lower, self.tick_spacing.read());
             }
@@ -818,12 +1058,22 @@ mod JediSwapV2Pool {
                 self.tick_bitmap_storage.flip_tick(tick_upper, self.tick_spacing.read());
             }
 
-            let (fee_growth_inside_0_X128, fee_growth_inside_1_X128) =
-                self.tick_storage.get_fee_growth_inside(tick_lower, tick_upper, tick, fee_growth_global_0_X128, fee_growth_global_1_X128);
+            let (fee_growth_inside_0_X128, fee_growth_inside_1_X128) = self
+                .tick_storage
+                .get_fee_growth_inside(
+                    tick_lower, tick_upper, tick, fee_growth_global_0_X128, fee_growth_global_1_X128
+                );
 
-            let position_key = PositionKey {owner, tick_lower, tick_upper};
-            
-            self.position_storage.update(position_key, liquidity_delta, fee_growth_inside_0_X128, fee_growth_inside_1_X128);
+            let position_key = PositionKey { owner, tick_lower, tick_upper };
+
+            self
+                .position_storage
+                .update(
+                    position_key,
+                    liquidity_delta,
+                    fee_growth_inside_0_X128,
+                    fee_growth_inside_1_X128
+                );
 
             // clear any tick data that is no longer needed
             if (liquidity_delta < Zeroable::zero()) {
@@ -835,7 +1085,7 @@ mod JediSwapV2Pool {
                     self.tick_storage.clear(tick_upper);
                 }
             }
-            
+
             self.position_storage.get(position_key)
         }
 
@@ -853,14 +1103,18 @@ mod JediSwapV2Pool {
         fn balance0(self: @ContractState) -> u256 { //TODO fallback balance_of/balanceOf
             // let token_dispatcher = IERC20Dispatcher { contract_address: self.token0.read() };
             // token_dispatcher.balance_of(get_contract_address())
-            let token_camel_dispatcher = IERC20CamelDispatcher { contract_address: self.token0.read() };
+            let token_camel_dispatcher = IERC20CamelDispatcher {
+                contract_address: self.token0.read()
+            };
             token_camel_dispatcher.balanceOf(get_contract_address())
         }
 
         fn balance1(self: @ContractState) -> u256 { //TODO fallback balance_of/balanceOf
             // let token_dispatcher = IERC20Dispatcher { contract_address: self.token1.read() };
             // token_dispatcher.balance_of(get_contract_address())
-            let token_camel_dispatcher = IERC20CamelDispatcher { contract_address: self.token1.read() };
+            let token_camel_dispatcher = IERC20CamelDispatcher {
+                contract_address: self.token1.read()
+            };
             token_camel_dispatcher.balanceOf(get_contract_address())
         }
     }

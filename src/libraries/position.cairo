@@ -33,7 +33,13 @@ struct PositionKey {
 #[starknet::interface]
 trait IPosition<TState> {
     fn get(self: @TState, position_key: PositionKey) -> PositionInfo;
-    fn update(ref self: TState, position_key: PositionKey, liquidity_delta: i128, fee_growth_inside_0_X128: u256, fee_growth_inside_1_X128: u256);
+    fn update(
+        ref self: TState,
+        position_key: PositionKey,
+        liquidity_delta: i128,
+        fee_growth_inside_0_X128: u256,
+        fee_growth_inside_1_X128: u256
+    );
 }
 
 #[starknet::component]
@@ -48,12 +54,15 @@ mod PositionComponent {
 
     #[storage]
     struct Storage {
-        positions: LegacyMap::<felt252, PositionInfo>,  // @dev Represents all the positions in a pool
+        positions: LegacyMap::<
+            felt252, PositionInfo
+        >, // @dev Represents all the positions in a pool
     }
 
     #[embeddable_as(Position)]
-    impl PositionImpl<TContractState, +HasComponent<TContractState>> of super::IPosition<ComponentState<TContractState>> {
-        
+    impl PositionImpl<
+        TContractState, +HasComponent<TContractState>
+    > of super::IPosition<ComponentState<TContractState>> {
         // @notice Returns the PositionInfo struct of a position, given an owner and position boundaries
         // @param position_key Key variables defining the position
         // @return position info
@@ -67,7 +76,13 @@ mod PositionComponent {
         // @param liquidity_delta The change in pool liquidity as a result of the position update
         // @param fee_growth_inside_0_X128 The all-time fee growth in token0, per unit of liquidity, inside the position's tick boundaries
         // @param fee_growth_inside_1_X128 The all-time fee growth in token1, per unit of liquidity, inside the position's tick boundaries
-        fn update(ref self: ComponentState<TContractState>, position_key: PositionKey, liquidity_delta: i128, fee_growth_inside_0_X128: u256, fee_growth_inside_1_X128: u256) {
+        fn update(
+            ref self: ComponentState<TContractState>,
+            position_key: PositionKey,
+            liquidity_delta: i128,
+            fee_growth_inside_0_X128: u256,
+            fee_growth_inside_1_X128: u256
+        ) {
             let position_hash = _get_position_hash(position_key);
             let mut position_info: PositionInfo = self.positions.read(position_hash);
 
@@ -84,8 +99,20 @@ mod PositionComponent {
             };
 
             // calculate accumulated fees
-            let tokens_owed_0 = mul_div(fee_growth_inside_0_X128 - position_info.fee_growth_inside_0_last_X128, position_info.liquidity.into(), Q128).try_into().unwrap();
-            let tokens_owed_1 = mul_div(fee_growth_inside_1_X128 - position_info.fee_growth_inside_1_last_X128, position_info.liquidity.into(), Q128).try_into().unwrap();
+            let tokens_owed_0 = mul_div(
+                fee_growth_inside_0_X128 - position_info.fee_growth_inside_0_last_X128,
+                position_info.liquidity.into(),
+                Q128
+            )
+                .try_into()
+                .unwrap();
+            let tokens_owed_1 = mul_div(
+                fee_growth_inside_1_X128 - position_info.fee_growth_inside_1_last_X128,
+                position_info.liquidity.into(),
+                Q128
+            )
+                .try_into()
+                .unwrap();
 
             // update the position
             if (liquidity_delta != IntegerTrait::<i128>::new(0, false)) {
@@ -105,8 +132,14 @@ mod PositionComponent {
     }
 
     #[generate_trait]
-    impl InternalImpl<TContractState, +HasComponent<TContractState>> of InternalTrait<TContractState> {
-        fn set(ref self: ComponentState<TContractState>, position_key: PositionKey, position_info: PositionInfo) {
+    impl InternalImpl<
+        TContractState, +HasComponent<TContractState>
+    > of InternalTrait<TContractState> {
+        fn set(
+            ref self: ComponentState<TContractState>,
+            position_key: PositionKey,
+            position_info: PositionInfo
+        ) {
             let position_hash = _get_position_hash(position_key);
             self.positions.write(position_hash, position_info);
         }

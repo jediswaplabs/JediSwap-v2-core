@@ -8,7 +8,7 @@ mod SwapMath {
         get_next_sqrt_price_from_output
     };
     use yas_core::numbers::signed_integer::integer_trait::IntegerTrait;
-    use snforge_std::{ PrintTrait };
+    use snforge_std::{PrintTrait};
 
     // @notice Computes the result of swapping some amount in, or amount out, given the parameters of the swap
     // @param sqrt_ratio_current_x96 The current sqrt price of the pool
@@ -35,30 +35,46 @@ mod SwapMath {
         let mut fee_amount = 0;
 
         if (exact_in) {
-            let amount_remaining_less_fee = mul_div(amount_remaining.mag, 1000000 - fee_pips.into(), 1000000);
+            let amount_remaining_less_fee = mul_div(
+                amount_remaining.mag, 1000000 - fee_pips.into(), 1000000
+            );
             amount_in =
                 if (zero_for_one) {
-                    get_amount0_delta_unsigned(sqrt_ratio_target_x96, sqrt_ratio_current_x96, liquidity, true)
+                    get_amount0_delta_unsigned(
+                        sqrt_ratio_target_x96, sqrt_ratio_current_x96, liquidity, true
+                    )
                 } else {
-                    get_amount1_delta_unsigned(sqrt_ratio_current_x96, sqrt_ratio_target_x96, liquidity, true)
+                    get_amount1_delta_unsigned(
+                        sqrt_ratio_current_x96, sqrt_ratio_target_x96, liquidity, true
+                    )
                 };
             if (amount_remaining_less_fee >= amount_in) {
                 sqrt_ratio_next_x96 = sqrt_ratio_target_x96;
             } else {
-                sqrt_ratio_next_x96 = get_next_sqrt_price_from_input(sqrt_ratio_current_x96, liquidity, amount_remaining_less_fee, zero_for_one);
+                sqrt_ratio_next_x96 =
+                    get_next_sqrt_price_from_input(
+                        sqrt_ratio_current_x96, liquidity, amount_remaining_less_fee, zero_for_one
+                    );
             }
         } else {
             amount_out =
                 if (zero_for_one) {
-                    get_amount1_delta_unsigned(sqrt_ratio_target_x96, sqrt_ratio_current_x96, liquidity, false)
+                    get_amount1_delta_unsigned(
+                        sqrt_ratio_target_x96, sqrt_ratio_current_x96, liquidity, false
+                    )
                 } else {
-                    get_amount0_delta_unsigned(sqrt_ratio_current_x96, sqrt_ratio_target_x96, liquidity, false)
+                    get_amount0_delta_unsigned(
+                        sqrt_ratio_current_x96, sqrt_ratio_target_x96, liquidity, false
+                    )
                 };
-            
+
             if (amount_remaining.mag >= amount_out) {
                 sqrt_ratio_next_x96 = sqrt_ratio_target_x96;
             } else {
-                sqrt_ratio_next_x96 = get_next_sqrt_price_from_output(sqrt_ratio_current_x96, liquidity, amount_remaining.mag, zero_for_one);
+                sqrt_ratio_next_x96 =
+                    get_next_sqrt_price_from_output(
+                        sqrt_ratio_current_x96, liquidity, amount_remaining.mag, zero_for_one
+                    );
             }
         }
 
@@ -70,28 +86,36 @@ mod SwapMath {
                 if (max && exact_in) {
                     amount_in
                 } else {
-                    get_amount0_delta_unsigned(sqrt_ratio_next_x96, sqrt_ratio_current_x96, liquidity, true)
+                    get_amount0_delta_unsigned(
+                        sqrt_ratio_next_x96, sqrt_ratio_current_x96, liquidity, true
+                    )
                 };
 
             amount_out =
                 if (max && !exact_in) {
                     amount_out
                 } else {
-                    get_amount1_delta_unsigned(sqrt_ratio_next_x96, sqrt_ratio_current_x96, liquidity, false)
+                    get_amount1_delta_unsigned(
+                        sqrt_ratio_next_x96, sqrt_ratio_current_x96, liquidity, false
+                    )
                 };
         } else {
             amount_in =
                 if (max && exact_in) {
                     amount_in
                 } else {
-                    get_amount1_delta_unsigned(sqrt_ratio_current_x96, sqrt_ratio_next_x96, liquidity, true)
+                    get_amount1_delta_unsigned(
+                        sqrt_ratio_current_x96, sqrt_ratio_next_x96, liquidity, true
+                    )
                 };
 
             amount_out =
                 if (max && !exact_in) {
                     amount_out
                 } else {
-                    get_amount0_delta_unsigned(sqrt_ratio_current_x96, sqrt_ratio_next_x96, liquidity, false)
+                    get_amount0_delta_unsigned(
+                        sqrt_ratio_current_x96, sqrt_ratio_next_x96, liquidity, false
+                    )
                 };
         }
 

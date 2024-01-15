@@ -16,7 +16,7 @@ fn expand_to_18_decimals(n: u256) -> u256 {
 #[test]
 fn test_amount_in_gets_capped_at_price_target_in_one_to_zero() {
     let price = 79228162514264337593543950336; //  encode_price_sqrt(1, 1) 
-    let price_target = 79623317895830914510639640423;   //  encode_price_sqrt(101, 100) 
+    let price_target = 79623317895830914510639640423; //  encode_price_sqrt(101, 100) 
     let liquidity: u128 = expand_to_18_decimals(2).try_into().unwrap();
     let amount = IntegerTrait::<i256>::new(expand_to_18_decimals(1), false);
     let fee: u32 = 600;
@@ -29,9 +29,7 @@ fn test_amount_in_gets_capped_at_price_target_in_one_to_zero() {
     assert(amount_in == 9975124224178055, 'incorrect amount_in');
     assert(fee_amount == 5988667735148, 'incorrect fee_amount');
     assert(amount_out == 9925619580021728, 'incorrect amount_out');
-    assert(
-        amount_in + fee_amount < amount.try_into().unwrap(), 'entire amount is not used'
-    );
+    assert(amount_in + fee_amount < amount.try_into().unwrap(), 'entire amount is not used');
 
     let price_after_whole_input_amount = SqrtPriceMath::get_next_sqrt_price_from_input(
         price, liquidity, amount.try_into().unwrap(), zero_for_one
@@ -47,7 +45,7 @@ fn test_amount_in_gets_capped_at_price_target_in_one_to_zero() {
 #[test]
 fn test_amount_out_gets_capped_at_price_target_in_one_to_zero() {
     let price = 79228162514264337593543950336; // encode_price_sqrt(1, 1)
-    let price_target = 79623317895830914510639640423;  // encode_price_sqrt(101, 100)
+    let price_target = 79623317895830914510639640423; // encode_price_sqrt(101, 100)
     let liquidity: u128 = expand_to_18_decimals(2).try_into().unwrap();
     let amount = IntegerTrait::<i256>::new(expand_to_18_decimals(1), true);
     let fee = 600;
@@ -88,12 +86,9 @@ fn test_amount_in_that_is_fully_spent_in_one_to_zero() {
     assert(amount_in == 999400000000000000, 'incorrect amount_in');
     assert(fee_amount == 600000000000000, 'incorrect fee_amount');
     assert(amount_out == 666399946655997866, 'incorrect amount_out');
-    assert(
-        amount_in + fee_amount == amount.try_into().unwrap(), 'entire amount is not used'
-    );
+    assert(amount_in + fee_amount == amount.try_into().unwrap(), 'entire amount is not used');
 
-    let price_after_whole_import_amount_less_fee =
-        SqrtPriceMath::get_next_sqrt_price_from_input(
+    let price_after_whole_import_amount_less_fee = SqrtPriceMath::get_next_sqrt_price_from_input(
         price, liquidity, amount.try_into().unwrap() - fee_amount, zero_for_one
     );
 
@@ -146,10 +141,7 @@ fn test_amount_out_is_capped_at_the_desired_amount_out() {
     assert(amount_in == 1, 'incorrect amount_in');
     assert(fee_amount == 1, 'incorrect fee_amount');
     assert(amount_out == 1, 'incorrect amount_out'); // would be 2 if not capped
-    assert(
-        sqrt_q_x96 == 417332158212080721273783715441581,
-        'incorrect sqrt_q_x96'
-    );
+    assert(sqrt_q_x96 == 417332158212080721273783715441581, 'incorrect sqrt_q_x96');
 }
 
 // target price of 1 uses partial input amount

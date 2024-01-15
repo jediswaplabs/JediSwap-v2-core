@@ -7,10 +7,14 @@ use yas_core::numbers::signed_integer::{i32::i32};
 #[starknet::interface]
 trait IJediSwapV2Factory<TContractState> {
     fn fee_amount_tick_spacing(self: @TContractState, fee: u32) -> u32;
-    fn get_pool(self: @TContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress;
+    fn get_pool(
+        self: @TContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32
+    ) -> ContractAddress;
     fn get_fee_protocol(self: @TContractState) -> u8;
-    
-    fn create_pool(ref self: TContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress;
+
+    fn create_pool(
+        ref self: TContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32
+    ) -> ContractAddress;
     fn enable_fee_amount(ref self: TContractState, fee: u32, tick_spacing: u32);
     fn set_fee_protocol(ref self: TContractState, fee_protocol: u8);
 }
@@ -18,11 +22,13 @@ trait IJediSwapV2Factory<TContractState> {
 
 #[starknet::contract]
 mod JediSwapV2Factory {
-
     use poseidon::poseidon_hash_span;
     use starknet::SyscallResultTrait;
     use starknet::syscalls::deploy_syscall;
-    use starknet::{ContractAddress, ClassHash, get_caller_address, get_contract_address, contract_address_to_felt252};
+    use starknet::{
+        ContractAddress, ClassHash, get_caller_address, get_contract_address,
+        contract_address_to_felt252
+    };
     use integer::{u256_from_felt252};
     use yas_core::numbers::signed_integer::{i32::i32, integer_trait::IntegerTrait};
     use openzeppelin::access::ownable::OwnableComponent;
@@ -31,7 +37,7 @@ mod JediSwapV2Factory {
 
     #[abi(embed_v0)]
     impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
-    
+
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
 
     #[event]
@@ -103,7 +109,7 @@ mod JediSwapV2Factory {
 
         self.fee_amount_tick_spacing.write(3000, 60);
         self.emit(FeeAmountEnabled { fee: 3000, tick_spacing: 60 });
-        
+
         self.fee_amount_tick_spacing.write(10000, 200);
         self.emit(FeeAmountEnabled { fee: 10000, tick_spacing: 200 });
 
@@ -112,7 +118,6 @@ mod JediSwapV2Factory {
 
     #[external(v0)]
     impl JediSwapV2FactoryImpl of super::IJediSwapV2Factory<ContractState> {
-
         // @notice Returns the tick spacing for a given fee amount, if enabled, or 0 if not enabled
         // @dev A fee amount can never be removed, so this value should be hard coded or cached in the calling context
         // @param fee The enabled fee, denominated in hundredths of a bip. Returns 0 in case of unenabled fee
@@ -127,7 +132,9 @@ mod JediSwapV2Factory {
         // @param token_b The contract address of the other token
         // @param fee The fee collected upon every swap in the pool, denominated in hundredths of a bip
         // @return The pool address
-        fn get_pool(self: @ContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress {
+        fn get_pool(
+            self: @ContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32
+        ) -> ContractAddress {
             self.pool.read((token_a, token_b, fee))
         }
 
@@ -146,11 +153,15 @@ mod JediSwapV2Factory {
         // from the fee. The call will revert if the pool already exists, the fee is invalid, or the token arguments
         // are invalid.
         // @return The address of the newly created pool
-        fn create_pool(ref self: ContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32) -> ContractAddress {
+        fn create_pool(
+            ref self: ContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32
+        ) -> ContractAddress {
             assert(token_a != token_b, 'tokens must be different');
             assert(token_a.is_non_zero() && token_b.is_non_zero(), 'tokens must be non zero');
 
-            let (token0, token1) = if (u256_from_felt252(contract_address_to_felt252(token_a)) < u256_from_felt252(contract_address_to_felt252(token_b))) {
+            let (token0, token1) = if (u256_from_felt252(
+                contract_address_to_felt252(token_a)
+            ) < u256_from_felt252(contract_address_to_felt252(token_b))) {
                 (token_a, token_b)
             } else {
                 (token_b, token_a)
@@ -166,14 +177,17 @@ mod JediSwapV2Factory {
             Serde::serialize(@token1, ref hash_data);
             Serde::serialize(@fee, ref hash_data);
             let salt = poseidon_hash_span(hash_data.span());
-            
+
             let mut constructor_calldata = array![];
             Serde::serialize(@token0, ref constructor_calldata);
             Serde::serialize(@token1, ref constructor_calldata);
             Serde::serialize(@fee, ref constructor_calldata);
             Serde::serialize(@tick_spacing, ref constructor_calldata);
 
-            let (pool, _) = deploy_syscall(self.pool_class_hash.read(), salt, constructor_calldata.span(), false).unwrap_syscall();
+            let (pool, _) = deploy_syscall(
+                self.pool_class_hash.read(), salt, constructor_calldata.span(), false
+            )
+                .unwrap_syscall();
 
             self.pool.write((token0, token1, fee), pool);
             // populate mapping in the reverse direction, deliberate choice to avoid the cost of comparing addresses
@@ -206,7 +220,10 @@ mod JediSwapV2Factory {
         // @param fee_protocol new protocol fee
         fn set_fee_protocol(ref self: ContractState, fee_protocol: u8) {
             self.ownable_storage.assert_only_owner();
-            assert(fee_protocol == 0 || (fee_protocol >= 4 && fee_protocol <= 10), 'incorrect fee_protocol');
+            assert(
+                fee_protocol == 0 || (fee_protocol >= 4 && fee_protocol <= 10),
+                'incorrect fee_protocol'
+            );
 
             let old_fee_protocol = self.fee_protocol.read();
             self.fee_protocol.write(fee_protocol);

@@ -1,12 +1,15 @@
 mod SqrtPriceMath {
     use yas_core::numbers::signed_integer::{i128::i128, i256::i256, integer_trait::IntegerTrait};
-    use yas_core::utils::math_utils::{FullMath::{div_rounding_up, mul_div, mul_div_rounding_up}, pow};
+    use yas_core::utils::math_utils::{
+        FullMath::{div_rounding_up, mul_div, mul_div_rounding_up}, pow
+    };
     use yas_core::utils::math_utils::BitShift::BitShiftTrait;
-    use snforge_std::{ PrintTrait };
+    use snforge_std::{PrintTrait};
 
     const R96: u256 = 96;
-    const Q96: u256 = 0x1000000000000000000000000;  // 79228162514264337593543950336 2**96
-    const Q128: u256 = 0x100000000000000000000000000000000; //   340282366920938463463374607431768211456  2**128
+    const Q96: u256 = 0x1000000000000000000000000; // 79228162514264337593543950336 2**96
+    const Q128: u256 =
+        0x100000000000000000000000000000000; //   340282366920938463463374607431768211456  2**128
     const MAX_UINT160: u256 = 1461501637330902918203684832716283019655932542975; // (2 ** 160) - 1
 
     // @notice Gets the next square root price given a delta of token0.
@@ -20,7 +23,9 @@ mod SqrtPriceMath {
     // @param amount How much of token0 to add or remove from virtual reserves
     // @param add Whether to add or remove the amount of token0
     // @return The price after adding or removing amount(depending on add above)
-    fn get_next_sqrt_price_from_amount0_rounding_up(sqrt_p_x96: u256, liquidity: u128, amount: u256, add: bool) -> u256 {
+    fn get_next_sqrt_price_from_amount0_rounding_up(
+        sqrt_p_x96: u256, liquidity: u128, amount: u256, add: bool
+    ) -> u256 {
         // we short circuit amount == 0 because the result is otherwise not guaranteed to equal the input price
         if (amount == 0) {
             return sqrt_p_x96;
@@ -59,17 +64,26 @@ mod SqrtPriceMath {
     // @param amount  How much of token1 to add, or remove, from virtual reserves
     // @param add Whether to add, or remove, the amount of token1
     // @return The price after adding or removing `amount`
-    fn get_next_sqrt_price_from_amount1_rounding_down(sqrt_p_x96: u256, liquidity: u128, amount: u256, add: bool) -> u256 {
-
+    fn get_next_sqrt_price_from_amount1_rounding_down(
+        sqrt_p_x96: u256, liquidity: u128, amount: u256, add: bool
+    ) -> u256 {
         // if we're adding (subtracting), rounding down requires rounding the quotient down (up)
         // in both cases, avoid a mulDiv for most inputs
         if (add) {
-            let quotient = if (amount <= MAX_UINT160) { amount.shl(R96) / liquidity.into() } else { mul_div(amount, Q96, liquidity.into())};
+            let quotient = if (amount <= MAX_UINT160) {
+                amount.shl(R96) / liquidity.into()
+            } else {
+                mul_div(amount, Q96, liquidity.into())
+            };
             let to_return = sqrt_p_x96 + quotient;
             assert(to_return <= MAX_UINT160, 'does not fit uint160');
             return to_return;
         } else {
-            let quotient = if (amount <= MAX_UINT160) { div_rounding_up(amount.shl(R96), liquidity.into()) } else { mul_div_rounding_up(amount, Q96, liquidity.into())};
+            let quotient = if (amount <= MAX_UINT160) {
+                div_rounding_up(amount.shl(R96), liquidity.into())
+            } else {
+                mul_div_rounding_up(amount, Q96, liquidity.into())
+            };
             assert(sqrt_p_x96 > quotient, 'sqrt_p_x96 < quotient');
             return sqrt_p_x96 - quotient;
         }
@@ -82,12 +96,18 @@ mod SqrtPriceMath {
     // @param amount_in How much of token0 or token1 is being swapped in
     // @param zero_for_one Whether the amount in is token0 or token1
     // @return The price after adding the input amount to token0 or token1
-    fn get_next_sqrt_price_from_input(sqrt_p_x96: u256, liquidity: u128, amount_in: u256, zero_for_one: bool) -> u256 {
+    fn get_next_sqrt_price_from_input(
+        sqrt_p_x96: u256, liquidity: u128, amount_in: u256, zero_for_one: bool
+    ) -> u256 {
         assert(sqrt_p_x96 > 0 && liquidity > 0, 'sqrt_p_x96 or liquidity <= 0');
         if (zero_for_one) {
-            return get_next_sqrt_price_from_amount0_rounding_up(sqrt_p_x96, liquidity, amount_in, true);
+            return get_next_sqrt_price_from_amount0_rounding_up(
+                sqrt_p_x96, liquidity, amount_in, true
+            );
         } else {
-            return get_next_sqrt_price_from_amount1_rounding_down(sqrt_p_x96, liquidity, amount_in, true);
+            return get_next_sqrt_price_from_amount1_rounding_down(
+                sqrt_p_x96, liquidity, amount_in, true
+            );
         }
     }
 
@@ -98,13 +118,19 @@ mod SqrtPriceMath {
     // @param amount_out How much of token0 or token1 is being swapped out
     // @param zero_for_one Whether the amount out is token0 or token1
     // @return The price after removing the output amount of token0 or token1
-    fn get_next_sqrt_price_from_output(sqrt_p_x96: u256, liquidity: u128, amount_out: u256, zero_for_one: bool) -> u256 {
+    fn get_next_sqrt_price_from_output(
+        sqrt_p_x96: u256, liquidity: u128, amount_out: u256, zero_for_one: bool
+    ) -> u256 {
         assert(sqrt_p_x96 > 0 && liquidity > 0, 'sqrt_p_x96 or liquidity <= 0');
 
         if (zero_for_one) {
-            return get_next_sqrt_price_from_amount1_rounding_down(sqrt_p_x96, liquidity, amount_out, false);
+            return get_next_sqrt_price_from_amount1_rounding_down(
+                sqrt_p_x96, liquidity, amount_out, false
+            );
         } else {
-            return get_next_sqrt_price_from_amount0_rounding_up(sqrt_p_x96, liquidity, amount_out, false);
+            return get_next_sqrt_price_from_amount0_rounding_up(
+                sqrt_p_x96, liquidity, amount_out, false
+            );
         }
     }
 
@@ -116,7 +142,9 @@ mod SqrtPriceMath {
     // @param liquidity The amount of usable liquidity
     // @param round_up Indicates whether to round the amount up or down
     // @return Amount of token0 required to cover a position of size liquidity between the two passed prices
-    fn get_amount0_delta_unsigned(sqrt_ratio_a_x96: u256, sqrt_ratio_b_x96: u256, liquidity: u128, round_up: bool) -> u256 {
+    fn get_amount0_delta_unsigned(
+        sqrt_ratio_a_x96: u256, sqrt_ratio_b_x96: u256, liquidity: u128, round_up: bool
+    ) -> u256 {
         let mut sqrt_ratio_lower_x96 = sqrt_ratio_a_x96;
         let mut sqrt_ratio_upper_x96 = sqrt_ratio_b_x96;
 
@@ -131,7 +159,10 @@ mod SqrtPriceMath {
         assert(sqrt_ratio_lower_x96 > 0, 'less than 0');
 
         if (round_up) {
-            return div_rounding_up(mul_div_rounding_up(numerator_1, numerator_2, sqrt_ratio_upper_x96), sqrt_ratio_lower_x96);
+            return div_rounding_up(
+                mul_div_rounding_up(numerator_1, numerator_2, sqrt_ratio_upper_x96),
+                sqrt_ratio_lower_x96
+            );
         } else {
             return mul_div(numerator_1, numerator_2, sqrt_ratio_upper_x96) / sqrt_ratio_lower_x96;
         }
@@ -144,7 +175,9 @@ mod SqrtPriceMath {
     // @param liquidity The amount of usable liquidity
     // @param round_up Whether to round the amount up or down
     // @return Amount of token1 required to cover a position of size liquidity between the two passed prices
-    fn get_amount1_delta_unsigned(sqrt_ratio_a_x96: u256, sqrt_ratio_b_x96: u256, liquidity: u128, round_up: bool) -> u256 {
+    fn get_amount1_delta_unsigned(
+        sqrt_ratio_a_x96: u256, sqrt_ratio_b_x96: u256, liquidity: u128, round_up: bool
+    ) -> u256 {
         let mut sqrt_ratio_lower_x96 = sqrt_ratio_a_x96;
         let mut sqrt_ratio_upper_x96 = sqrt_ratio_b_x96;
 
@@ -154,7 +187,9 @@ mod SqrtPriceMath {
         }
 
         if (round_up) {
-            return mul_div_rounding_up(liquidity.into(), sqrt_ratio_upper_x96 - sqrt_ratio_lower_x96, Q96);
+            return mul_div_rounding_up(
+                liquidity.into(), sqrt_ratio_upper_x96 - sqrt_ratio_lower_x96, Q96
+            );
         } else {
             return mul_div(liquidity.into(), sqrt_ratio_upper_x96 - sqrt_ratio_lower_x96, Q96);
         }
@@ -167,9 +202,21 @@ mod SqrtPriceMath {
     // @return Amount of token0 corresponding to the passed liquidity_delta between the two prices
     fn get_amount0_delta(sqrt_ratio_a_x96: u256, sqrt_ratio_b_x96: u256, liquidity: i128) -> i256 {
         if (liquidity < IntegerTrait::<i128>::new(0, false)) {
-            return IntegerTrait::<i256>::new(get_amount0_delta_unsigned(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, false), true);
+            return IntegerTrait::<
+                i256
+            >::new(
+                get_amount0_delta_unsigned(
+                    sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, false
+                ),
+                true
+            );
         } else {
-            return IntegerTrait::<i256>::new(get_amount0_delta_unsigned(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, true), false);
+            return IntegerTrait::<
+                i256
+            >::new(
+                get_amount0_delta_unsigned(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, true),
+                false
+            );
         }
     }
 
@@ -180,9 +227,21 @@ mod SqrtPriceMath {
     // @return Amount of token1 corresponding to the passed liquidity_delta between the two prices
     fn get_amount1_delta(sqrt_ratio_a_x96: u256, sqrt_ratio_b_x96: u256, liquidity: i128) -> i256 {
         if (liquidity < IntegerTrait::<i128>::new(0, false)) {
-            return IntegerTrait::<i256>::new(get_amount1_delta_unsigned(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, false), true);
+            return IntegerTrait::<
+                i256
+            >::new(
+                get_amount1_delta_unsigned(
+                    sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, false
+                ),
+                true
+            );
         } else {
-            return IntegerTrait::<i256>::new(get_amount1_delta_unsigned(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, true), false);
+            return IntegerTrait::<
+                i256
+            >::new(
+                get_amount1_delta_unsigned(sqrt_ratio_a_x96, sqrt_ratio_b_x96, liquidity.mag, true),
+                false
+            );
         }
     }
 }
