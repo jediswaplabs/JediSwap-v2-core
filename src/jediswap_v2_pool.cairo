@@ -122,11 +122,9 @@ mod JediSwapV2Pool {
     component!(path: TickComponent, storage: tick_storage, event: TickEvent);
     component!(path: TickBitmapComponent, storage: tick_bitmap_storage, event: TickBitmapEvent);
 
-    #[abi(embed_v0)]
     impl PositionImpl = PositionComponent::Position<ContractState>;
     impl TickImpl = TickComponent::Tick<ContractState>;
     impl TickBitmapImpl = TickBitmapComponent::TickBitmap<ContractState>;
-
     impl PositionInternalImpl = PositionComponent::InternalImpl<ContractState>;
 
     #[event]
@@ -194,7 +192,6 @@ mod JediSwapV2Pool {
     }
 
     // @notice Emitted when a position's liquidity is removed
-    // @dev Does not withdraw any fees earned by the liquidity position, which must be withdrawn via #collect
     // @param owner The owner of the position for which liquidity is removed
     // @param tick_lower The lower tick of the position
     // @param tick_upper The upper tick of the position
@@ -503,16 +500,16 @@ mod JediSwapV2Pool {
             (amount0, amount1)
         }
 
-        /// @notice Swap token0 for token1, or token1 for token0
-        /// @dev The caller of this method receives a callback in the form of IJediSwapV2SwapCallback#jediswapV2SwapCallback
-        /// @param recipient The address to receive the output of the swap
-        /// @param zero_for_one The direction of the swap, true for token0 to token1, false for token1 to token0
-        /// @param amount_specified The amount of the swap, which implicitly configures the swap as exact input (positive), or exact output (negative)
-        /// @param sqrt_price_limit_X96 The Q64.96 sqrt price limit. If zero for one, the price cannot be less than this
-        /// value after the swap. If one for zero, the price cannot be greater than this value after the swap
-        /// @param data Any data to be passed through to the callback
-        /// @return The delta of the balance of token0 of the pool, exact when negative, minimum when positive
-        /// @return The delta of the balance of token1 of the pool, exact when negative, minimum when positive
+        // @notice Swap token0 for token1, or token1 for token0
+        // @dev The caller of this method receives a callback in the form of IJediSwapV2SwapCallback#jediswapV2SwapCallback
+        // @param recipient The address to receive the output of the swap
+        // @param zero_for_one The direction of the swap, true for token0 to token1, false for token1 to token0
+        // @param amount_specified The amount of the swap, which implicitly configures the swap as exact input (positive), or exact output (negative)
+        // @param sqrt_price_limit_X96 The Q64.96 sqrt price limit. If zero for one, the price cannot be less than this
+        // value after the swap. If one for zero, the price cannot be greater than this value after the swap
+        // @param data Any data to be passed through to the callback
+        // @return The delta of the balance of token0 of the pool, exact when negative, minimum when positive
+        // @return The delta of the balance of token1 of the pool, exact when negative, minimum when positive
         fn swap(ref self: ContractState, recipient: ContractAddress, zero_for_one: bool, amount_specified: i256, sqrt_price_limit_X96: u256, data: Array<felt252>) -> (i256, i256) {
             self._check_and_lock();
             assert(amount_specified.is_non_zero(), 'AS');
@@ -700,6 +697,7 @@ mod JediSwapV2Pool {
         }
 
         // @notice Collect the protocol fee accrued to the pool
+        // @dev Only factory owner can call
         // @param recipient The address to which collected protocol fees should be sent
         // @param amount0_requested The maximum amount of token0 to send, can be 0 to collect fees in only token1
         // @param amount1_requested The maximum amount of token1 to send, can be 0 to collect fees in only token0

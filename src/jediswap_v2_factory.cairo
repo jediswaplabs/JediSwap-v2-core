@@ -193,7 +193,7 @@ mod JediSwapV2Factory {
             assert(fee <= 100000, 'fee cannot be above 100000');
 
             // tick spacing is capped at 16384 to prevent the situation where tick_spacing is so large that
-            // TickBitmap#next_initialized_tick_within_one_word overflows int24 container from a valid tick
+            // TickBitmap#next_initialized_tick_within_one_word overflows container from a valid tick
             // 16384 ticks represents a >5x price change with ticks of 1 bips
             assert(tick_spacing > 0 && tick_spacing < 16384, 'invalid tick_spacing');
             assert(self.fee_amount_tick_spacing(fee).is_zero(), 'fee already enabled');
@@ -202,7 +202,7 @@ mod JediSwapV2Factory {
             self.emit(FeeAmountEnabled { fee, tick_spacing });
         }
 
-        // @notice Set the denominator of the protocol's % share of the fees
+        // @notice Sets the denominator of the protocol's % share of the fees
         // @param fee_protocol new protocol fee
         fn set_fee_protocol(ref self: ContractState, fee_protocol: u8) {
             self.ownable_storage.assert_only_owner();
