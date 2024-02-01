@@ -5,12 +5,12 @@ use starknet::{ContractAddress, ClassHash};
 use yas_core::numbers::signed_integer::{i32::i32};
 
 #[starknet::interface]
-trait IJediSwapV2Factory<TContractState> {
+trait IJediSwapV2FactoryV2<TContractState> {
     fn fee_amount_tick_spacing(self: @TContractState, fee: u32) -> u32;
     fn get_pool(
         self: @TContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32
     ) -> ContractAddress;
-    fn get_fee_protocol(self: @TContractState) -> u8;
+    fn get_fee_protocol_v2(self: @TContractState) -> u8;
     fn get_pool_class_hash(self: @TContractState) -> ClassHash;
 
     fn create_pool(
@@ -23,7 +23,7 @@ trait IJediSwapV2Factory<TContractState> {
 
 
 #[starknet::contract]
-mod JediSwapV2Factory {
+mod JediSwapV2FactoryV2 {
     use poseidon::poseidon_hash_span;
     use starknet::SyscallResultTrait;
     use starknet::syscalls::deploy_syscall;
@@ -134,7 +134,7 @@ mod JediSwapV2Factory {
     }
 
     #[external(v0)]
-    impl JediSwapV2FactoryImpl of super::IJediSwapV2Factory<ContractState> {
+    impl JediSwapV2FactoryV2Impl of super::IJediSwapV2FactoryV2<ContractState> {
         // @notice Returns the tick spacing for a given fee amount, if enabled, or 0 if not enabled
         // @dev A fee amount can never be removed, so this value should be hard coded or cached in the calling context
         // @param fee The enabled fee, denominated in hundredths of a bip. Returns 0 in case of unenabled fee
@@ -158,7 +158,7 @@ mod JediSwapV2Factory {
         // @notice The current protocol fee as a percentage of the swap fee taken on withdrawal
         // represented as an integer denominator (1/x)%
         // @return The current protocol fee denominator
-        fn get_fee_protocol(self: @ContractState) -> u8 {
+        fn get_fee_protocol_v2(self: @ContractState) -> u8 {
             self.fee_protocol.read()
         }
 

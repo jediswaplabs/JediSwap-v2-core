@@ -11,6 +11,8 @@ mod libraries {
 }
 
 mod test_contracts {
+    mod jediswap_v2_factory_v2;
+    mod jediswap_v2_pool_v2;
     mod pool_mint_test;
     mod pool_swap_test;
 }

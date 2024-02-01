@@ -6,7 +6,7 @@ This repository consists of the core contracts of JediSwap V2 protocol, a cairo 
 
 Prerequisites:
 
-- [Scarb] (https://github.com/software-mansion/scarb) for managing the project.
+- [Scarb](https://github.com/software-mansion/scarb) for managing the project.
 - [starknet-foundry](https://github.com/foundry-rs/starknet-foundry) for testing and writing scripts. 
 
 ### Compile Contracts
@@ -24,31 +24,14 @@ snforge test
 
 #### Run a local devnet
 
-```
-python -m venv ./venv
-source ./venv/bin/activate
-```
+We use [starknet-devnet-rs](https://github.com/0xSpaceShard/starknet-devnet-rs)
 
-#### Install dependencies
-```
-pip install -r requirements.txt
-```
-
-Find more info about the installed dependencies here:
-* [starknet-devnet](https://github.com/Shard-Labs/starknet-devnet)
-* [starknet.py](https://github.com/software-mansion/starknet.py)
-
+Run the devnet and add one of the predeployed accounts with your preferred name <test_account_local>. See the instructions [here](https://foundry-rs.github.io/starknet-foundry/starknet/account.html#importing-an-account).
 
 #### Run Scripts
 
-All scripts are placed in ```scripts``` folder. testnet config is not committed, please create your own in ```scripts/config```
+Run sncast in the parent folder by specifying the path to the script file. Example:
 
-To run scripts on local system, you first need to run a devnet server:
 ```
-starknet-devnet
-```
-
-Run script by specifying the path to the script file. Example:
-```
-python scripts/deploy.py local
+sncast --url http://127.0.0.1:5050 --account <test_account_local> --path-to-scarb-toml scripts/Scarb.toml script deploy_factory_and_pool
 ```

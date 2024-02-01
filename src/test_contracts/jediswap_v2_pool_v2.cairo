@@ -76,8 +76,8 @@ trait IJediSwapV2SwapCallback<T> {
 }
 
 #[starknet::interface]
-trait IJediSwapV2Pool<TContractState> {
-    fn get_factory(self: @TContractState) -> ContractAddress;
+trait IJediSwapV2PoolV2<TContractState> {
+    fn get_factory_v2(self: @TContractState) -> ContractAddress;
     fn get_token0(self: @TContractState) -> ContractAddress;
     fn get_token1(self: @TContractState) -> ContractAddress;
     fn get_fee(self: @TContractState) -> u32;
@@ -139,7 +139,7 @@ trait IJediSwapV2Pool<TContractState> {
 }
 
 #[starknet::contract]
-mod JediSwapV2Pool {
+mod JediSwapV2PoolV2 {
     use super::{
         ProtocolFees, ModifyPositionParams, SwapState, SwapSteps, IJediSwapV2MintCallbackDispatcher,
         IJediSwapV2MintCallbackDispatcherTrait, IJediSwapV2SwapCallbackDispatcher,
@@ -348,8 +348,8 @@ mod JediSwapV2Pool {
     }
 
     #[external(v0)]
-    impl JediSwapV2PoolImpl of super::IJediSwapV2Pool<ContractState> {
-        fn get_factory(self: @ContractState) -> ContractAddress {
+    impl JediSwapV2PoolV2Impl of super::IJediSwapV2PoolV2<ContractState> {
+        fn get_factory_v2(self: @ContractState) -> ContractAddress {
             self.factory.read()
         }
 

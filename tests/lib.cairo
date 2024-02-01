@@ -9,4 +9,6 @@ mod test_factory;
 mod test_pool;
 mod test_pool_swaps;
 mod test_pool_multi_swap;
+mod test_upgrade_factory;
+mod test_upgrade_pool;
 mod utils;
