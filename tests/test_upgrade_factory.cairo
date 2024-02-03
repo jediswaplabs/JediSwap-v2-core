@@ -172,7 +172,7 @@ fn test_upgrade_succeeds_with_zero_pool_class_hash() {
 }
 
 #[test]
-fn test_upgrade_succeeds_state_remians_same() {
+fn test_upgrade_succeeds_state_remains_same() {
     let (owner, factory_address) = setup_factory();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };

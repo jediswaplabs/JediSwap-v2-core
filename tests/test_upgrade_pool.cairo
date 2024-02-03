@@ -141,7 +141,7 @@ fn test_upgrade_succeeds_new_selector() {
 }
 
 #[test]
-fn test_upgrade_succeeds_state_remians_same() {
+fn test_upgrade_succeeds_state_remains_same() {
     let (owner, factory_address) = setup_factory();
     let pool_address = initialize_pool_1_10(factory_address, 100);
 
