@@ -47,7 +47,7 @@ mod PoolMintTest {
     #[constructor]
     fn constructor(ref self: ContractState) {}
 
-    #[external(v0)]
+    #[abi(embed_v0)]
     impl PoolMintTest of super::IPoolMintTest<ContractState> {
         fn mint(
             ref self: ContractState,

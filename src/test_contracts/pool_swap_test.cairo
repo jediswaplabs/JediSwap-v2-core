@@ -95,7 +95,7 @@ mod PoolSwapTest {
     #[constructor]
     fn constructor(ref self: ContractState) {}
 
-    #[external(v0)]
+    #[abi(embed_v0)]
     impl PoolSwapTest of super::IPoolSwapTest<ContractState> {
         fn swap_exact_0_for_1(
             ref self: ContractState,

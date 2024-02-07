@@ -83,9 +83,7 @@ fn test_upgrade_succeeds_with_owner_emits_event() {
                 (
                     pool_address,
                     UpgradeableComponent::Event::Upgraded(
-                        UpgradeableComponent::Upgraded {
-                            class_hash: new_pool_class_hash
-                        }
+                        UpgradeableComponent::Upgraded { class_hash: new_pool_class_hash }
                     )
                 )
             ]

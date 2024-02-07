@@ -347,7 +347,7 @@ mod JediSwapV2Pool {
             .write(self.tick_storage.tick_spacing_to_max_liquidity_per_tick(tick_spacing));
     }
 
-    #[external(v0)]
+    #[abi(embed_v0)]
     impl JediSwapV2PoolImpl of super::IJediSwapV2Pool<ContractState> {
         fn get_factory(self: @ContractState) -> ContractAddress {
             self.factory.read()

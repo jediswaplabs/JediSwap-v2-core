@@ -65,25 +65,22 @@ fn test_upgrade_succeeds_with_owner_emits_event() {
                 (
                     factory_address,
                     UpgradeableComponent::Event::Upgraded(
-                        UpgradeableComponent::Upgraded {
-                            class_hash: new_factory_class_hash
-                        }
+                        UpgradeableComponent::Upgraded { class_hash: new_factory_class_hash }
                     )
                 )
             ]
         );
-
-    // spy
-    //     .assert_emitted(
-    //         @array![
-    //             (
-    //                 factory_address,
-    //                 JediSwapV2Factory::Event::UpgradedPoolClassHash(
-    //                     JediSwapV2Factory::UpgradedPoolClassHash { class_hash: new_pool_class_hash }
-    //                 )
-    //             )
-    //         ]
-    //     );
+// spy
+//     .assert_emitted(
+//         @array![
+//             (
+//                 factory_address,
+//                 JediSwapV2Factory::Event::UpgradedPoolClassHash(
+//                     JediSwapV2Factory::UpgradedPoolClassHash { class_hash: new_pool_class_hash }
+//                 )
+//             )
+//         ]
+//     );
 }
 
 #[test]

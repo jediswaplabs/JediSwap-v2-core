@@ -133,7 +133,7 @@ mod JediSwapV2Factory {
         self.fee_protocol.write(0);
     }
 
-    #[external(v0)]
+    #[abi(embed_v0)]
     impl JediSwapV2FactoryImpl of super::IJediSwapV2Factory<ContractState> {
         // @notice Returns the tick spacing for a given fee amount, if enabled, or 0 if not enabled
         // @dev A fee amount can never be removed, so this value should be hard coded or cached in the calling context
