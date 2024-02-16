@@ -1,0 +1,16 @@
+[package]
+name = "deploy_scripts"
+version = "0.0.1"
+
+[lib]
+sierra = true
+casm = true
+
+[[target.starknet-contract]]
+sierra = true
+casm = true
+
+[dependencies]
+starknet = "2.4.3"
+sncast_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.16.0" }
+jediswap_v2_core = { path = "../" }

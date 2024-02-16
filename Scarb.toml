@@ -1,0 +1,19 @@
+[package]
+name = "jediswap_v2_core"
+version = "0.0.1"
+
+[lib]
+
+
+[[target.starknet-contract]]
+sierra = true
+casm = true
+casm-add-pythonic-hints = true
+allowed-libfuncs-list.name = "all"
+build-external-contracts = ["openzeppelin::presets::erc20::ERC20"]
+
+[dependencies]
+starknet = "2.4.3"
+yas_core = { git = "https://github.com/lambdaclass/yet-another-swap.git" }
+snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.16.0" }
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.8.0" }
