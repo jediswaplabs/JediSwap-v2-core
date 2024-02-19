@@ -10,6 +10,7 @@ use snforge_std::{
     PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
+use openzeppelin::security::interface::{IPausableDispatcher, IPausableDispatcherTrait};
 
 use super::utils::{owner, new_owner, token0, token1};
 
@@ -62,6 +63,15 @@ fn test_initial_fee_protocol() {
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
     assert(factory_dispatcher.get_fee_protocol() == 0, 'Invalid fee protcol');
+}
+
+#[test]
+fn test_initial_paused_state() {
+    let (owner, factory_address) = setup_factory();
+
+    let pausable_dispatcher = IPausableDispatcher { contract_address: factory_address };
+    
+    assert(!pausable_dispatcher.is_paused(), 'Paused');
 }
 
 #[test]

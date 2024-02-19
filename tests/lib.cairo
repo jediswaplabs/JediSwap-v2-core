@@ -6,6 +6,8 @@ mod test_libraries {
     mod test_tick;
 }
 mod test_factory;
+mod test_pause_factory;
+mod test_pause_pool;
 mod test_pool;
 mod test_pool_swaps;
 mod test_pool_multi_swap;
