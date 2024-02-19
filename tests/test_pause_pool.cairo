@@ -177,8 +177,135 @@ fn test_mint_succeeds_after_unpause() {
 }
 
 #[test]
-#[should_panic(expected: ('Paused',))]
-fn test_burn_fails_when_paused() {
+#[should_panic(expected: ('Invalid caller',))]
+fn test_burn_pause_fails_with_wrong_caller() {
+    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+
+    pool_dispatcher.pause_burn();
+}
+
+#[test]
+#[should_panic(expected: ('Invalid caller',))]
+fn test_burn_unpause_fails_with_wrong_caller() {
+    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+
+    pool_dispatcher.unpause_burn();
+}
+
+#[test]
+#[should_panic(expected: ('Burn Paused',))]
+fn test_burn_fails_when_burn_paused() {
+    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+
+    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+    let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
+
+    let token0_dispatcher = IERC20Dispatcher { contract_address: pool_dispatcher.get_token0() };
+    start_prank(CheatTarget::One(pool_dispatcher.get_token0()), user1());
+    token0_dispatcher.approve(pool_mint_test_dispatcher.contract_address, 100 * pow(10, 18));
+    stop_prank(CheatTarget::One(pool_dispatcher.get_token0()));
+
+    let token1_dispatcher = IERC20Dispatcher { contract_address: pool_dispatcher.get_token1() };
+    start_prank(CheatTarget::One(pool_dispatcher.get_token1()), user1());
+    token1_dispatcher.approve(pool_mint_test_dispatcher.contract_address, 100 * pow(10, 18));
+    stop_prank(CheatTarget::One(pool_dispatcher.get_token1()));
+
+    start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
+    pool_mint_test_dispatcher.mint(pool_address, user1(), get_min_tick(), get_max_tick(), 3161);
+    stop_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address));
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+
+    start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
+    pool_mint_test_dispatcher
+        .mint(
+            pool_address,
+            user1(),
+            IntegerTrait::<i32>::new(240, true),
+            IntegerTrait::<i32>::new(0, false),
+            10000
+        );
+    stop_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address));
+
+    start_prank(CheatTarget::One(pool_address), owner);
+    pool_dispatcher.pause_burn();
+    stop_prank(CheatTarget::One(pool_address));
+
+    start_prank(CheatTarget::One(pool_address), user1());
+    pool_dispatcher
+        .burn(IntegerTrait::<i32>::new(240, true), IntegerTrait::<i32>::new(0, false), 10000);
+    stop_prank(CheatTarget::One(pool_address));
+}
+
+#[test]
+fn test_burn_succeeds_after_burn_unpaused() {
+    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+
+    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+    let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
+
+    let token0_dispatcher = IERC20Dispatcher { contract_address: pool_dispatcher.get_token0() };
+    start_prank(CheatTarget::One(pool_dispatcher.get_token0()), user1());
+    token0_dispatcher.approve(pool_mint_test_dispatcher.contract_address, 100 * pow(10, 18));
+    stop_prank(CheatTarget::One(pool_dispatcher.get_token0()));
+
+    let token1_dispatcher = IERC20Dispatcher { contract_address: pool_dispatcher.get_token1() };
+    start_prank(CheatTarget::One(pool_dispatcher.get_token1()), user1());
+    token1_dispatcher.approve(pool_mint_test_dispatcher.contract_address, 100 * pow(10, 18));
+    stop_prank(CheatTarget::One(pool_dispatcher.get_token1()));
+
+    start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
+    pool_mint_test_dispatcher.mint(pool_address, user1(), get_min_tick(), get_max_tick(), 3161);
+    stop_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address));
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+
+    start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
+    pool_mint_test_dispatcher
+        .mint(
+            pool_address,
+            user1(),
+            IntegerTrait::<i32>::new(240, true),
+            IntegerTrait::<i32>::new(0, false),
+            10000
+        );
+    stop_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address));
+
+    start_prank(CheatTarget::One(pool_address), owner);
+    pool_dispatcher.pause_burn();
+    stop_prank(CheatTarget::One(pool_address));
+
+    start_prank(CheatTarget::One(pool_address), owner);
+    pool_dispatcher.unpause_burn();
+    stop_prank(CheatTarget::One(pool_address));
+
+    start_prank(CheatTarget::One(pool_address), user1());
+    pool_dispatcher
+        .burn(IntegerTrait::<i32>::new(240, true), IntegerTrait::<i32>::new(0, false), 10000);
+    let (amount0, amount1) = pool_dispatcher
+        .static_collect(
+            user1(),
+            IntegerTrait::<i32>::new(240, true),
+            IntegerTrait::<i32>::new(0, false),
+            BoundedInt::<u128>::max(),
+            BoundedInt::<u128>::max()
+        );
+    stop_prank(CheatTarget::One(pool_address));
+
+    assert(amount0 == 120, 'Incorrect amount0');
+    assert(amount1 == 0, 'Incorrect amount1');
+}
+
+#[test]
+fn test_burn_succeeds_when_paused() {
     let (owner, factory_address, pool_address) = initialize_pool_1_10();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
@@ -220,7 +347,18 @@ fn test_burn_fails_when_paused() {
     start_prank(CheatTarget::One(pool_address), user1());
     pool_dispatcher
         .burn(IntegerTrait::<i32>::new(240, true), IntegerTrait::<i32>::new(0, false), 10000);
+    let (amount0, amount1) = pool_dispatcher
+        .static_collect(
+            user1(),
+            IntegerTrait::<i32>::new(240, true),
+            IntegerTrait::<i32>::new(0, false),
+            BoundedInt::<u128>::max(),
+            BoundedInt::<u128>::max()
+        );
     stop_prank(CheatTarget::One(pool_address));
+
+    assert(amount0 == 120, 'Incorrect amount0');
+    assert(amount1 == 0, 'Incorrect amount1');
 }
 
 
@@ -286,8 +424,57 @@ fn test_burn_succeeds_after_unpause() {
 }
 
 #[test]
-#[should_panic(expected: ('Paused',))]
-fn test_collect_fails_when_paused() {
+#[should_panic(expected: ('Burn Paused',))]
+fn test_collect_fails_when_burn_paused() {
+    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+
+    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+    start_prank(CheatTarget::One(pool_address), owner);
+    pool_dispatcher.pause_burn();
+    stop_prank(CheatTarget::One(pool_address));
+
+    start_prank(CheatTarget::One(pool_address), user1());
+    let (amount0, amount1) = pool_dispatcher
+        .collect(
+            user1(),
+            get_min_tick(),
+            get_max_tick(),
+            BoundedInt::<u128>::max(),
+            BoundedInt::<u128>::max()
+        );
+    stop_prank(CheatTarget::One(pool_address));
+}
+
+#[test]
+fn test_collect_succeeds_after_burn_unpaused() {
+    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+
+    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+
+    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+    start_prank(CheatTarget::One(pool_address), owner);
+    pool_dispatcher.pause_burn();
+    stop_prank(CheatTarget::One(pool_address));
+    start_prank(CheatTarget::One(pool_address), owner);
+    pool_dispatcher.unpause_burn();
+    stop_prank(CheatTarget::One(pool_address));
+
+    start_prank(CheatTarget::One(pool_address), user1());
+    let (amount0, amount1) = pool_dispatcher
+        .collect(
+            user1(),
+            get_min_tick(),
+            get_max_tick(),
+            BoundedInt::<u128>::max(),
+            BoundedInt::<u128>::max()
+        );
+    stop_prank(CheatTarget::One(pool_address));
+}
+
+#[test]
+fn test_collect_succeeds_when_paused() {
     let (owner, factory_address, pool_address) = initialize_pool_1_10();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
@@ -358,10 +545,6 @@ fn test_swap_fails_when_paused() {
 
     start_prank(CheatTarget::One(factory_address), owner);
     factory_dispatcher.pause();
-    stop_prank(CheatTarget::One(factory_address));
-
-    start_prank(CheatTarget::One(factory_address), owner);
-    factory_dispatcher.unpause();
     stop_prank(CheatTarget::One(factory_address));
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
