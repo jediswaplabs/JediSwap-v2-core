@@ -8,7 +8,7 @@ use deploy_scripts::utils::{owner};
 fn main() {
     let max_fee = 9999999999999999;
     let salt = 0x6;
-    let starting_nonce = 1; // Change it when running script, TODO get from environment
+    let starting_nonce = 67; // Change it when running script, TODO get from environment
 
     let mut current_nonce = starting_nonce;
 

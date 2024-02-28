@@ -136,6 +136,8 @@ trait IJediSwapV2Pool<TContractState> {
         amount1_requested: u128
     ) -> (u128, u128);
     fn upgrade(ref self: TContractState, new_class_hash: ClassHash);
+    fn pause_burn(ref self: TContractState);
+    fn unpause_burn(ref self: TContractState);
 }
 
 #[starknet::contract]
@@ -154,6 +156,7 @@ mod JediSwapV2Pool {
         IERC20Dispatcher, IERC20DispatcherTrait, IERC20CamelDispatcher, IERC20CamelDispatcherTrait
     };
     use openzeppelin::access::ownable::interface::{IOwnableDispatcher, IOwnableDispatcherTrait};
+    use openzeppelin::security::interface::{IPausableDispatcher, IPausableDispatcherTrait};
     use openzeppelin::upgrades::upgradeable::UpgradeableComponent;
     use jediswap_v2_core::libraries::position::{PositionComponent, PositionKey, PositionInfo};
     use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{
@@ -318,6 +321,7 @@ mod JediSwapV2Pool {
         fee_growth_global_1_X128: u256, // @notice The fee growth as a Q128.128 fees of token1 collected per unit of liquidity for the entire life of the pool
         protocol_fees: ProtocolFees, // @notice The amounts of token0 and token1 that are owed to the protocol
         liquidity: u128, // @notice The currently in range liquidity available to the pool
+        burn_paused: bool,
         #[substorage(v0)]
         position_storage: PositionComponent::Storage,
         #[substorage(v0)]
@@ -445,6 +449,7 @@ mod JediSwapV2Pool {
         fn initialize(ref self: ContractState, sqrt_price_X96: u256) {
             // The initialize function should only be called once. To ensure this,
             // we verify that the price is not initialized.
+            self._check_paused();
             assert(self.sqrt_price_X96.read().is_zero(), 'already initialized');
 
             self.sqrt_price_X96.write(sqrt_price_X96);
@@ -475,6 +480,7 @@ mod JediSwapV2Pool {
             amount: u128,
             data: Array<felt252>
         ) -> (u256, u256) {
+            self._check_paused();
             self._check_and_lock();
 
             assert(amount > 0, 'amount must be greater than 0');
@@ -548,6 +554,7 @@ mod JediSwapV2Pool {
             amount0_requested: u128,
             amount1_requested: u128
         ) -> (u128, u128) {
+            self._check_burn_paused();
             self._check_and_lock();
             // we don't need to _check_ticks here, because invalid positions will never have non-zero tokens_owed_{0,1}
             let caller = get_caller_address();
@@ -596,6 +603,7 @@ mod JediSwapV2Pool {
         fn burn(
             ref self: ContractState, tick_lower: i32, tick_upper: i32, amount: u128
         ) -> (u256, u256) {
+            self._check_burn_paused();
             self._check_and_lock();
             let caller = get_caller_address();
             let (mut position, amount0_i, amount1_i) = self
@@ -638,6 +646,7 @@ mod JediSwapV2Pool {
             sqrt_price_limit_X96: u256,
             data: Array<felt252>
         ) -> (i256, i256) {
+            self._check_paused();
             self._check_and_lock();
             assert(amount_specified.is_non_zero(), 'AS');
 
@@ -904,6 +913,7 @@ mod JediSwapV2Pool {
             amount0_requested: u128,
             amount1_requested: u128
         ) -> (u128, u128) {
+            self._check_paused();
             self._check_and_lock();
             let caller = get_caller_address();
             let ownable_dispatcher = IOwnableDispatcher { contract_address: self.factory.read() };
@@ -947,6 +957,24 @@ mod JediSwapV2Pool {
             let ownable_dispatcher = IOwnableDispatcher { contract_address: self.factory.read() };
             assert(ownable_dispatcher.owner() == caller, 'Invalid caller');
             self.upgradeable_storage._upgrade(new_class_hash);
+            self._unlock();
+        }
+
+        fn pause_burn(ref self: ContractState) {
+            self._check_and_lock();
+            let caller = get_caller_address();
+            let ownable_dispatcher = IOwnableDispatcher { contract_address: self.factory.read() };
+            assert(ownable_dispatcher.owner() == caller, 'Invalid caller');
+            self.burn_paused.write(true);
+            self._unlock();
+        }
+
+        fn unpause_burn(ref self: ContractState) {
+            self._check_and_lock();
+            let caller = get_caller_address();
+            let ownable_dispatcher = IOwnableDispatcher { contract_address: self.factory.read() };
+            assert(ownable_dispatcher.owner() == caller, 'Invalid caller');
+            self.burn_paused.write(false);
             self._unlock();
         }
     }
@@ -1118,6 +1146,17 @@ mod JediSwapV2Pool {
             let locked = self.unlocked.read();
             self.unlocked.write(true);
         }
+
+        fn _check_paused(ref self: ContractState) {
+            let pausable_dispatcher = IPausableDispatcher { contract_address: self.factory.read() };
+            assert(!pausable_dispatcher.is_paused(), 'Paused');
+        }
+
+        fn _check_burn_paused(ref self: ContractState) {
+            let burn_paused = self.burn_paused.read();
+            assert(!burn_paused, 'Burn Paused');
+        }
+
 
         fn balance0(self: @ContractState) -> u256 { //TODO fallback balance_of/balanceOf
             // let token_dispatcher = IERC20Dispatcher { contract_address: self.token0.read() };
