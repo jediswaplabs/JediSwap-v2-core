@@ -16,7 +16,7 @@ trait ITickBitmap<TState> {
 mod TickBitmapComponent {
     use integer::BoundedInt;
     use yas_core::libraries::bit_math::BitMath;
-    use yas_core::libraries::tick_bitmap::TickBitmap::position;
+    // use yas_core::libraries::tick_bitmap::TickBitmap::position;
     use yas_core::numbers::signed_integer::{
         i16::i16, i32::{i32, u8Intoi32, i32TryIntoi16, i32TryIntou8, mod_i32},
         integer_trait::IntegerTrait
@@ -126,5 +126,54 @@ mod TickBitmapComponent {
                 false
             }
         }
+    }
+
+    // @notice Calculates the word value based on a tick input
+    // @dev For ticks between 0 and 255 inclusive, it returns 0
+    //      For ticks greater than 255, it divides the tick by 256
+    //      For ticks less than 0 but greater than or equal to -256, it returns -1
+    //      For other negative ticks, it divides the tick by 256 and subtracts 1
+    // @param tick An i32 input representing the tick value
+    // @return calculated word
+    fn calculate_word(tick: i32) -> i16 {
+        let zero = IntegerTrait::<i32>::new(0, false);
+        let one_negative = IntegerTrait::<i32>::new(1, true);
+        let upper_bound = IntegerTrait::<i32>::new(255, false);
+        let divisor = IntegerTrait::<i32>::new(256, false);
+        let negative_lower_bound = IntegerTrait::<i32>::new(256, true);
+
+        let result = if tick >= zero && tick <= upper_bound { //tick: [0, 255]
+            zero
+        } else if tick > upper_bound { //tick: [256, 887272]
+            tick / divisor
+        } else if tick >= negative_lower_bound { //tick: [-256, -1]
+            one_negative
+        } else { //tick: [-887272, -257]
+            if (mod_i32(tick, divisor) != zero) {
+                IntegerTrait::<i32>::new((tick.mag / divisor.mag) + 1, true)
+            } else {
+                IntegerTrait::<i32>::new((tick.mag / divisor.mag), true)
+            }
+        };
+        result.try_into().expect('calculate_word')
+    }
+
+    // @notice Calculates the bit value based on a given tick input
+    // @param tick An i32 input representing the tick value
+    // @return calculated bit
+    fn calculate_bit(tick: i32) -> u8 {
+        // Using this util function because Orion returns negative reminder numbers
+        let bit = mod_i32(tick, IntegerTrait::<i32>::new(256, false));
+        bit.try_into().expect('calculate_bit')
+    }
+
+    // @notice Computes the position in the mapping where the initialized bit for a tick lives
+    // @param tick The tick for which to compute the position
+    // @return The key in the mapping containing the word in which the bit is stored
+    // @return The bit position in the word where the flag is stored
+    fn position(tick: i32) -> (i16, u8) {
+        let word_pos: i16 = calculate_word(tick);
+        let bit_pos: u8 = calculate_bit(tick);
+        (word_pos, bit_pos)
     }
 }

@@ -1,4 +1,5 @@
 mod SqrtPriceMath {
+    use core::integer::u256_overflow_mul;
     use yas_core::numbers::signed_integer::{i128::i128, i256::i256, integer_trait::IntegerTrait};
     use yas_core::utils::math_utils::{
         FullMath::{div_rounding_up, mul_div, mul_div_rounding_up}, pow
@@ -32,10 +33,10 @@ mod SqrtPriceMath {
         }
 
         let numerator = liquidity.into().shl(R96);
-        let product = amount * sqrt_p_x96;
+        let (product, overflow) = u256_overflow_mul(amount, sqrt_p_x96);
 
         if (add) {
-            if (product / amount == sqrt_p_x96) {
+            if (!overflow) {
                 let denominator = numerator + product;
                 if (denominator >= numerator) {
                     return mul_div_rounding_up(numerator, sqrt_p_x96, denominator);
@@ -45,7 +46,7 @@ mod SqrtPriceMath {
         } else {
             // if the product overflows, we know the denominator underflows
             // in addition, we must check that the denominator does not underflow
-            assert(product / amount == sqrt_p_x96, 'product overflows');
+            assert(!overflow, 'product overflows');
             assert(numerator > product, 'denominator negative');
             let denominator = numerator - product;
             let to_return = mul_div_rounding_up(numerator, sqrt_p_x96, denominator);

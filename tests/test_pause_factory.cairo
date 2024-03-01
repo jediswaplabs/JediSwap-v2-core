@@ -43,7 +43,6 @@ fn test_pause_succeeds_with_owner_emits_event() {
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
-
     let mut spy = spy_events(SpyOn::One(factory_address));
 
     start_prank(CheatTarget::One(factory_address), owner);
@@ -58,9 +57,7 @@ fn test_pause_succeeds_with_owner_emits_event() {
             @array![
                 (
                     factory_address,
-                    PausableComponent::Event::Paused(
-                        PausableComponent::Paused { account: owner }
-                    )
+                    PausableComponent::Event::Paused(PausableComponent::Paused { account: owner })
                 )
             ]
         );
@@ -107,7 +104,6 @@ fn test_unpause_succeeds_with_owner_emits_event() {
     let (owner, factory_address) = setup_factory();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
-
 
     let mut spy = spy_events(SpyOn::One(factory_address));
 

@@ -551,8 +551,7 @@ fn test_swap_fails_when_paused() {
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
     start_prank(CheatTarget::One(pool_swap_test_dispatcher.contract_address), user1());
-    pool_swap_test_dispatcher
-        .swap_exact_1_for_0(pool_address, 2 * pow(10, 18), user1(), 0);
+    pool_swap_test_dispatcher.swap_exact_1_for_0(pool_address, 2 * pow(10, 18), user1(), 0);
     stop_prank(CheatTarget::One(pool_swap_test_dispatcher.contract_address));
 }
 
@@ -575,7 +574,6 @@ fn test_swap_enters_after_unpause() {
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
     start_prank(CheatTarget::One(pool_swap_test_dispatcher.contract_address), user1());
-    pool_swap_test_dispatcher
-        .swap_exact_1_for_0(pool_address, 2 * pow(10, 18), user1(), 0);
+    pool_swap_test_dispatcher.swap_exact_1_for_0(pool_address, 2 * pow(10, 18), user1(), 0);
     stop_prank(CheatTarget::One(pool_swap_test_dispatcher.contract_address));
 }

@@ -50,6 +50,7 @@ mod PositionComponent {
     use poseidon::poseidon_hash_span;
     use yas_core::numbers::signed_integer::{i128::i128, integer_trait::IntegerTrait};
     use yas_core::utils::math_utils::FullMath::mul_div;
+    use yas_core::utils::math_utils::mod_subtraction;
     use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::Q128;
 
     #[storage]
@@ -100,14 +101,18 @@ mod PositionComponent {
 
             // calculate accumulated fees
             let tokens_owed_0 = mul_div(
-                fee_growth_inside_0_X128 - position_info.fee_growth_inside_0_last_X128,
+                mod_subtraction(
+                    fee_growth_inside_0_X128, position_info.fee_growth_inside_0_last_X128
+                ),
                 position_info.liquidity.into(),
                 Q128
             )
                 .try_into()
                 .unwrap();
             let tokens_owed_1 = mul_div(
-                fee_growth_inside_1_X128 - position_info.fee_growth_inside_1_last_X128,
+                mod_subtraction(
+                    fee_growth_inside_1_X128, position_info.fee_growth_inside_1_last_X128
+                ),
                 position_info.liquidity.into(),
                 Q128
             )

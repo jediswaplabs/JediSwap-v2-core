@@ -62,7 +62,7 @@ fn test_initial_fee_protocol() {
     let (owner, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
-    assert(factory_dispatcher.get_fee_protocol() == 0, 'Invalid fee protcol');
+    assert(factory_dispatcher.get_fee_protocol() == 0, 'Invalid fee protocol');
 }
 
 #[test]
@@ -70,7 +70,7 @@ fn test_initial_paused_state() {
     let (owner, factory_address) = setup_factory();
 
     let pausable_dispatcher = IPausableDispatcher { contract_address: factory_address };
-    
+
     assert(!pausable_dispatcher.is_paused(), 'Paused');
 }
 
