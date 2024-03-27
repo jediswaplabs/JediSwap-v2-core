@@ -3,7 +3,7 @@
 // @dev Positions store additional state for tracking fees owed to the position
 
 use starknet::ContractAddress;
-use yas_core::numbers::signed_integer::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
 
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
@@ -48,9 +48,9 @@ mod PositionComponent {
 
     use integer::BoundedInt;
     use poseidon::poseidon_hash_span;
-    use yas_core::numbers::signed_integer::{i128::i128, integer_trait::IntegerTrait};
-    use yas_core::utils::math_utils::FullMath::mul_div;
-    use yas_core::utils::math_utils::mod_subtraction;
+    use jediswap_v2_core::libraries::signed_integers::{i128::i128, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::full_math::mul_div;
+    use jediswap_v2_core::libraries::math_utils::mod_subtraction;
     use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::Q128;
 
     #[storage]

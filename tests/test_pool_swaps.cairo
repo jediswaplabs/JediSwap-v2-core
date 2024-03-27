@@ -1,10 +1,10 @@
 use core::traits::TryInto;
 use starknet::{ContractAddress, contract_address_try_from_felt252};
 use integer::BoundedInt;
-use yas_core::numbers::signed_integer::{
+use jediswap_v2_core::libraries::signed_integers::{
     i32::i32, i128::i128, i256::i256, integer_trait::IntegerTrait
 };
-use yas_core::utils::math_utils::{pow};
+use jediswap_v2_core::libraries::math_utils::pow;
 use openzeppelin::token::erc20::{
     ERC20Component, interface::{IERC20Dispatcher, IERC20DispatcherTrait}
 };
@@ -261,24 +261,24 @@ fn execute_and_test_swap(
     let pool_price_before = pool_dispatcher.get_sqrt_price_X96();
     let tick_before = pool_dispatcher.get_tick();
 
-    'amount0_before'.print();
-    pool_balance0.print();
-    expected_results.amount0_before.print();
+    // 'amount0_before'.print();
+    // pool_balance0.print();
+    // expected_results.amount0_before.print();
 
-    'amount1_before'.print();
-    pool_balance1.print();
-    expected_results.amount1_before.print();
+    // 'amount1_before'.print();
+    // pool_balance1.print();
+    // expected_results.amount1_before.print();
 
-    'pool_price_before'.print();
-    pool_price_before.print();
-    expected_results.pool_price_before.print();
+    // 'pool_price_before'.print();
+    // pool_price_before.print();
+    // expected_results.pool_price_before.print();
     
 
-    'tick_before'.print();
-    tick_before.mag.print();
-    tick_before.sign.print();
-    expected_results.tick_before.mag.print();
-    expected_results.tick_before.sign.print();
+    // 'tick_before'.print();
+    // tick_before.mag.print();
+    // tick_before.sign.print();
+    // expected_results.tick_before.mag.print();
+    // expected_results.tick_before.sign.print();
     
     assert(pool_balance0 == expected_results.amount0_before, 'Wrong amount0_before');
     assert(pool_balance1 == expected_results.amount1_before, 'Wrong amount1_before');
@@ -434,51 +434,51 @@ fn execute_and_test_swap(
         );
     let execution_price = calculate_execution_price(pool_balance0_delta.mag, pool_balance1_delta.mag);
 
-    'amount0_delta'.print();
-    pool_balance0_delta.mag.print();
-    pool_balance0_delta.sign.print();
-    expected_results.amount0_delta.mag.print();
-    expected_results.amount0_delta.sign.print();
+    // 'amount0_delta'.print();
+    // pool_balance0_delta.mag.print();
+    // pool_balance0_delta.sign.print();
+    // expected_results.amount0_delta.mag.print();
+    // expected_results.amount0_delta.sign.print();
     
 
-    'amount1_delta'.print();
-    pool_balance1_delta.mag.print();
-    pool_balance1_delta.sign.print();
-    expected_results.amount1_delta.mag.print();
-    expected_results.amount1_delta.sign.print();
+    // 'amount1_delta'.print();
+    // pool_balance1_delta.mag.print();
+    // pool_balance1_delta.sign.print();
+    // expected_results.amount1_delta.mag.print();
+    // expected_results.amount1_delta.sign.print();
     
 
-    'execution price'.print();
-    execution_price.print();
-    // let execution_price_felt: felt252 = execution_price.try_into().unwrap();
-    // execution_price_felt.print();
-    expected_results.execution_price.print();
-    // let expected_execution_price_felt: felt252 = expected_results.execution_price.try_into().unwrap();
-    // expected_execution_price_felt.print();
+    // 'execution price'.print();
+    // execution_price.print();
+    // // let execution_price_felt: felt252 = execution_price.try_into().unwrap();
+    // // execution_price_felt.print();
+    // expected_results.execution_price.print();
+    // // let expected_execution_price_felt: felt252 = expected_results.execution_price.try_into().unwrap();
+    // // expected_execution_price_felt.print();
     
 
-    'fee_growth_global_0_X128_delta'.print();
+    // 'fee_growth_global_0_X128_delta'.print();
     let fee_growth_global_0_X128_delta = pool_dispatcher.get_fee_growth_global_0_X128();
-    fee_growth_global_0_X128_delta.print();
-    expected_results.fee_growth_global_0_X128_delta.print();
+    // fee_growth_global_0_X128_delta.print();
+    // expected_results.fee_growth_global_0_X128_delta.print();
     
 
-    'fee_growth_global_1_X128_delta'.print();
+    // 'fee_growth_global_1_X128_delta'.print();
     let fee_growth_global_1_X128_delta = pool_dispatcher.get_fee_growth_global_1_X128();
-    fee_growth_global_1_X128_delta.print();
-    expected_results.fee_growth_global_1_X128_delta.print();
+    // fee_growth_global_1_X128_delta.print();
+    // expected_results.fee_growth_global_1_X128_delta.print();
     
 
-    'pool_price_after'.print();
-    pool_price_after.print();
-    expected_results.pool_price_after.print();
+    // 'pool_price_after'.print();
+    // pool_price_after.print();
+    // expected_results.pool_price_after.print();
     
 
-    'tick_after'.print();
-    tick_after.mag.print();
-    tick_after.sign.print();
-    expected_results.tick_after.mag.print();
-    expected_results.tick_after.sign.print();
+    // 'tick_after'.print();
+    // tick_after.mag.print();
+    // tick_after.sign.print();
+    // expected_results.tick_after.mag.print();
+    // expected_results.tick_after.sign.print();
     
     assert(pool_balance0_delta == expected_results.amount0_delta, 'Wrong amount0_delta');
     assert(pool_balance1_delta == expected_results.amount1_delta, 'Wrong amount1_delta');

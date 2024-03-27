@@ -1,6 +1,6 @@
 use integer::BoundedInt;
 use jediswap_v2_core::libraries::tick::{TickInfo, TickComponent::{Tick, InternalImpl}};
-use yas_core::numbers::signed_integer::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
 use snforge_std::PrintTrait;
 
 #[starknet::contract]
@@ -31,35 +31,6 @@ mod TickMock {
 fn STATE() -> TickMock::ContractState {
     TickMock::contract_state_for_testing()
 }
-
-// def get_min_tick(tick_spacing):
-//     return math.ceil(-887272/tick_spacing) * tick_spacing
-
-// def get_max_tick(tick_spacing):
-//     return math.floor(887272/tick_spacing) * tick_spacing
-
-// def get_max_liquidity_per_tick(tick_spacing):
-//     return ((2 ** 128) - 1)/((get_max_tick(tick_spacing) - get_min_tick(tick_spacing)) / tick_spacing + 1)
-//     print(f'{result:.0f}')
-
-// fn flip_tick(mut state: TickMock::ContractState, tick: i32) ->  TickMock::ContractState {
-//     state.tick_bitmap_storage.flip_tick(tick, 1);
-//     state
-// }
-
-// fn flip_ticks(mut state: TickBitmapMock::ContractState) ->  TickBitmapMock::ContractState {
-//     state = flip_tick(state, IntegerTrait::<i32>::new(10000, true));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(200, true));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(55, true));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(4, true));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(70, false));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(78, false));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(84, false));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(139, false));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(240, false));
-//     state = flip_tick(state, IntegerTrait::<i32>::new(535, false));
-//     state
-// }
 
 #[test]
 fn test_tick_spacing_to_max_liquidity_per_tick_returns_correct_value_for_100_fee() {
@@ -478,7 +449,7 @@ fn test_update_nets_the_liquidity_based_on_upper_tick() {
 }
 
 #[test]
-#[should_panic(expected: ('int: out of range',))]
+#[should_panic(expected: ('i128: out of range',))]
 fn test_update_reverts_on_overflow_liquidity_gross() {
     let mut state = STATE();
     state

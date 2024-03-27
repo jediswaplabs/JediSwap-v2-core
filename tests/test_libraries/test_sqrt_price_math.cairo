@@ -3,7 +3,9 @@ use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{
     MAX_UINT160, R96, get_next_sqrt_price_from_input, get_next_sqrt_price_from_output,
     get_amount0_delta_unsigned, get_amount1_delta_unsigned
 };
-use yas_core::utils::math_utils::{pow, FullMath::mul_div, BitShift::BitShiftTrait};
+use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
+use jediswap_v2_core::libraries::math_utils::pow;
+use jediswap_v2_core::libraries::full_math::mul_div;
 use snforge_std::PrintTrait;
 
 fn expand_to_18_decimals(n: u256) -> u256 {

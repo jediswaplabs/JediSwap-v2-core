@@ -4,7 +4,7 @@ use starknet::{
 };
 use integer::{u256_from_felt252};
 use snforge_std::{declare, start_prank, stop_prank, ContractClass, ContractClassTrait, CheatTarget};
-use yas_core::utils::math_utils::{pow};
+use jediswap_v2_core::libraries::math_utils::pow;
 use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 
 fn user1() -> ContractAddress {

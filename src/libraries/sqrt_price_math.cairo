@@ -1,10 +1,8 @@
 mod SqrtPriceMath {
     use core::integer::u256_overflow_mul;
-    use yas_core::numbers::signed_integer::{i128::i128, i256::i256, integer_trait::IntegerTrait};
-    use yas_core::utils::math_utils::{
-        FullMath::{div_rounding_up, mul_div, mul_div_rounding_up}, pow
-    };
-    use yas_core::utils::math_utils::BitShift::BitShiftTrait;
+    use jediswap_v2_core::libraries::signed_integers::{i128::i128, i256::i256, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
+    use jediswap_v2_core::libraries::full_math::{div_rounding_up, mul_div, mul_div_rounding_up};
     use snforge_std::{PrintTrait};
 
     const R96: u256 = 96;

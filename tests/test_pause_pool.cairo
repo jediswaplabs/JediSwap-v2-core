@@ -1,7 +1,6 @@
 use core::traits::TryInto;
 use integer::BoundedInt;
 use starknet::{ContractAddress, contract_address_try_from_felt252};
-use yas_core::utils::math_utils::{pow};
 use openzeppelin::upgrades::upgradeable::UpgradeableComponent;
 use openzeppelin::security::interface::{IPausableDispatcher, IPausableDispatcherTrait};
 use openzeppelin::token::erc20::{
@@ -24,7 +23,8 @@ use snforge_std::{
     PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
-use yas_core::numbers::signed_integer::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::math_utils::pow;
 
 use super::utils::{owner, user1, token0_1};
 

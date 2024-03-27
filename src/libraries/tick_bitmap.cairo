@@ -1,4 +1,4 @@
-use yas_core::numbers::signed_integer::i32::i32;
+use jediswap_v2_core::libraries::signed_integers::i32::i32;
 
 #[starknet::interface]
 trait ITickBitmap<TState> {
@@ -15,13 +15,10 @@ trait ITickBitmap<TState> {
 #[starknet::component]
 mod TickBitmapComponent {
     use integer::BoundedInt;
-    use yas_core::libraries::bit_math::BitMath;
-    // use yas_core::libraries::tick_bitmap::TickBitmap::position;
-    use yas_core::numbers::signed_integer::{
-        i16::i16, i32::{i32, u8Intoi32, i32TryIntoi16, i32TryIntou8, mod_i32},
-        integer_trait::IntegerTrait
-    };
-    use yas_core::utils::math_utils::{BitShift::BitShiftTrait, pow};
+    use jediswap_v2_core::libraries::bit_math::{most_significant_bit, least_significant_bit};
+    use jediswap_v2_core::libraries::signed_integers::{i16::i16, i32::i32, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
+    use snforge_std::PrintTrait;
 
     #[storage]
     struct Storage {
@@ -41,7 +38,6 @@ mod TickBitmapComponent {
         fn flip_tick(ref self: ComponentState<TContractState>, tick: i32, tick_spacing: u32) {
             let tick_spacing_i = IntegerTrait::<i32>::new(tick_spacing, false);
             assert(tick % tick_spacing_i == IntegerTrait::<i32>::new(0, false), 'tick misaligned');
-
             let (word_pos, bit_pos) = position(tick / tick_spacing_i);
             let mask: u256 = 1_u256.shl(bit_pos.into());
             let word = self.bitmap.read(word_pos);
@@ -79,7 +75,7 @@ mod TickBitmapComponent {
                 let initialized = masked != 0;
                 // overflow/underflow is possible, but prevented externally by limiting both tickSpacing and tick
                 let next = if (initialized) {
-                    (compressed - (bit_pos - BitMath::most_significant_bit(masked)).into())
+                    (compressed - (bit_pos - most_significant_bit(masked)).into())
                         * tick_spacing_i
                 } else {
                     (compressed - bit_pos.into()) * tick_spacing_i
@@ -99,7 +95,7 @@ mod TickBitmapComponent {
                 let next = if initialized {
                     (compressed
                         + IntegerTrait::<i32>::new(1, false)
-                        + (BitMath::least_significant_bit(masked) - bit_pos).into())
+                        + (least_significant_bit(masked) - bit_pos).into())
                         * tick_spacing_i
                 } else {
                     (compressed
@@ -149,7 +145,7 @@ mod TickBitmapComponent {
         } else if tick >= negative_lower_bound { //tick: [-256, -1]
             one_negative
         } else { //tick: [-887272, -257]
-            if (mod_i32(tick, divisor) != zero) {
+            if (tick % divisor != zero) {   // TODO check this modulo
                 IntegerTrait::<i32>::new((tick.mag / divisor.mag) + 1, true)
             } else {
                 IntegerTrait::<i32>::new((tick.mag / divisor.mag), true)
@@ -162,9 +158,13 @@ mod TickBitmapComponent {
     // @param tick An i32 input representing the tick value
     // @return calculated bit
     fn calculate_bit(tick: i32) -> u8 {
-        // Using this util function because Orion returns negative reminder numbers
-        let bit = mod_i32(tick, IntegerTrait::<i32>::new(256, false));
-        bit.try_into().expect('calculate_bit')
+        let bit = tick % IntegerTrait::<i32>::new(256, false);
+        // This converts int8 to uint8 by wrapping around.
+        if (bit.sign) {
+            (256 - bit.mag).try_into().expect('calculate_bit')
+        } else {
+            bit.mag.try_into().expect('calculate_bit')
+        }
     }
 
     // @notice Computes the position in the mapping where the initialized bit for a tick lives

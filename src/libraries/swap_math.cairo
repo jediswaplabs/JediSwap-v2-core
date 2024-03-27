@@ -1,13 +1,12 @@
 // Computes the result of a swap within ticks
 // Contains methods for computing the result of a swap within a single tick price range, i.e., a single tick.
 mod SwapMath {
-    use yas_core::utils::math_utils::FullMath::{div_rounding_up, mul_div, mul_div_rounding_up};
-    use yas_core::numbers::signed_integer::i256::i256;
+    use jediswap_v2_core::libraries::full_math::{div_rounding_up, mul_div, mul_div_rounding_up};
+    use jediswap_v2_core::libraries::signed_integers::{i256::i256, integer_trait::IntegerTrait};
     use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{
         get_amount0_delta_unsigned, get_amount1_delta_unsigned, get_next_sqrt_price_from_input,
         get_next_sqrt_price_from_output
     };
-    use yas_core::numbers::signed_integer::integer_trait::IntegerTrait;
     use snforge_std::{PrintTrait};
 
     // @notice Computes the result of swapping some amount in, or amount out, given the parameters of the swap

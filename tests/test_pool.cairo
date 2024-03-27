@@ -1,7 +1,7 @@
 use starknet::{ContractAddress, contract_address_try_from_felt252};
 use integer::BoundedInt;
-use yas_core::numbers::signed_integer::{i32::i32, i128::i128, integer_trait::IntegerTrait};
-use yas_core::utils::math_utils::{pow};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::math_utils::pow;
 use openzeppelin::token::erc20::{
     ERC20Component, interface::{IERC20Dispatcher, IERC20DispatcherTrait}
 };
@@ -1598,7 +1598,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_exiting_range() {
 
     let k_before = pool_dispatcher.get_liquidity();
 
-    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity');
+    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity 1');
 
     // add liquidity at and above current tick
     start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
@@ -1614,7 +1614,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_exiting_range() {
 
     let k_after = pool_dispatcher.get_liquidity();
 
-    assert(k_after == 3 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity');
+    assert(k_after == 3 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity 2');
 
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
@@ -1632,7 +1632,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_exiting_range() {
 
     assert(
         pool_dispatcher.get_liquidity() == 2 * pow(10, 18).try_into().unwrap(),
-        'Incorrect liquidity'
+        'Incorrect liquidity 3'
     );
 }
 
@@ -1644,7 +1644,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_entering_range() {
 
     let k_before = pool_dispatcher.get_liquidity();
 
-    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity');
+    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity 1');
 
     // add liquidity below current tick
     start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
@@ -1661,7 +1661,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_entering_range() {
     // ensure virtual supply hasn't changed
     let k_after = pool_dispatcher.get_liquidity();
 
-    assert(k_after == k_before, 'Incorrect liquidity');
+    assert(k_after == k_before, 'Incorrect liquidity 2');
 
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
@@ -1679,7 +1679,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_entering_range() {
 
     assert(
         pool_dispatcher.get_liquidity() == 3 * pow(10, 18).try_into().unwrap(),
-        'Incorrect liquidity'
+        'Incorrect liquidity 3'
     );
 }
 

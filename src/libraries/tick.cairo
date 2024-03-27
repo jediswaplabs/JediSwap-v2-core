@@ -1,6 +1,4 @@
-use yas_core::numbers::signed_integer::{
-    i32::i32, i64::i64, i128::i128, integer_trait::IntegerTrait
-};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
 struct TickInfo {
@@ -59,12 +57,8 @@ mod TickComponent {
     use integer::BoundedInt;
     use poseidon::poseidon_hash_span;
 
-    use yas_core::libraries::liquidity_math::LiquidityMath;
-    use yas_core::numbers::signed_integer::{
-        i32::{i32, i32TryIntou128, i32_div_no_round}, i64::i64, i128::i128,
-        integer_trait::IntegerTrait
-    };
-    use yas_core::utils::math_utils::mod_subtraction;
+    use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::math_utils::mod_subtraction;
     use jediswap_v2_core::libraries::tick_math::TickMath::{MIN_TICK, MAX_TICK};
 
     #[storage]
@@ -85,10 +79,9 @@ mod TickComponent {
             self: @ComponentState<TContractState>, tick_spacing: u32
         ) -> u128 {
             let tick_spacing_i = IntegerTrait::<i32>::new(tick_spacing, false);
-            let min_tick = i32_div_no_round(MIN_TICK(), tick_spacing_i) * tick_spacing_i;
-            let max_tick = i32_div_no_round(MAX_TICK(), tick_spacing_i) * tick_spacing_i;
-            let num_ticks = i32_div_no_round((max_tick - min_tick), tick_spacing_i)
-                + IntegerTrait::<i32>::new(1, false);
+            let min_tick = (MIN_TICK() / tick_spacing_i) * tick_spacing_i;
+            let max_tick = (MAX_TICK() / tick_spacing_i) * tick_spacing_i;
+            let num_ticks = ((max_tick - min_tick) / tick_spacing_i) + IntegerTrait::<i32>::new(1, false);
 
             let max_u128: u128 = BoundedInt::max();
             max_u128 / num_ticks.try_into().expect('num ticks cannot be negative!')

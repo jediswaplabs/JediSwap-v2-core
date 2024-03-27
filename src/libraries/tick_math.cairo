@@ -1,10 +1,8 @@
 mod TickMath {
     use integer::BoundedInt;
 
-    use yas_core::numbers::signed_integer::{
-        i32::i32, integer_trait::IntegerTrait, i256::{i256, bitwise_or}
-    };
-    use yas_core::utils::math_utils::BitShift::BitShiftTrait;
+    use jediswap_v2_core::libraries::signed_integers::{i32::i32, i256::{i256, bitwise_or}, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
 
     impl i256TryIntoi32 of TryInto<i256, i32> {
         fn try_into(self: i256) -> Option<i32> {

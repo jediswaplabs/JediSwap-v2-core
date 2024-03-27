@@ -7,7 +7,6 @@ version = "0.0.1"
 dependencies = [
  "openzeppelin",
  "snforge_std",
- "yas_core",
 ]
 
 [[package]]
@@ -19,8 +18,3 @@ source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.8.0#c23
 name = "snforge_std"
 version = "0.16.0"
 source = "git+https://github.com/foundry-rs/starknet-foundry.git?tag=v0.16.0#f58e0ab42b6095b7d0cb841ede595aecbc9cb45d"
-
-[[package]]
-name = "yas_core"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/yet-another-swap.git#a7dc85de6c555ded1fa80d68af7387761cc54a5a"

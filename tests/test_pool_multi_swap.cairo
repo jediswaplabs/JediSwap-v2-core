@@ -1,9 +1,9 @@
 use starknet::{ContractAddress, contract_address_try_from_felt252};
 use integer::BoundedInt;
-use yas_core::numbers::signed_integer::{
+use jediswap_v2_core::libraries::signed_integers::{
     i32::i32, i128::i128, i256::i256, integer_trait::IntegerTrait
 };
-use yas_core::utils::math_utils::{pow};
+use jediswap_v2_core::libraries::math_utils::pow;
 use openzeppelin::token::erc20::{
     ERC20Component, interface::{IERC20Dispatcher, IERC20DispatcherTrait}
 };

@@ -1,5 +1,6 @@
 use jediswap_v2_core::libraries::tick_bitmap::TickBitmapComponent::{TickBitmap, InternalImpl};
-use yas_core::numbers::signed_integer::{i32::i32, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, integer_trait::IntegerTrait};
+use snforge_std::PrintTrait;
 
 #[starknet::contract]
 mod TickBitmapMock {

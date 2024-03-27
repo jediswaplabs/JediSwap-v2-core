@@ -2,7 +2,7 @@
 // @notice Deploys JediSwap V2 pools and manages ownership and control over pool protocol fees
 
 use starknet::{ContractAddress, ClassHash};
-use yas_core::numbers::signed_integer::{i32::i32};
+use jediswap_v2_core::libraries::signed_integers::i32::i32;
 
 #[starknet::interface]
 trait IJediSwapV2Factory<TContractState> {
@@ -34,7 +34,7 @@ mod JediSwapV2Factory {
         contract_address_to_felt252
     };
     use integer::{u256_from_felt252};
-    use yas_core::numbers::signed_integer::{i32::i32, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::signed_integers::{i32::i32, integer_trait::IntegerTrait};
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::upgrades::upgradeable::UpgradeableComponent;
     use openzeppelin::security::pausable::PausableComponent;

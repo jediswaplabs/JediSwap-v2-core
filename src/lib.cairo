@@ -2,6 +2,17 @@ mod jediswap_v2_factory;
 mod jediswap_v2_pool;
 
 mod libraries {
+    mod signed_integers {
+        mod i16;
+        mod i32;
+        mod i128;
+        mod i256;
+        mod integer_trait;
+    }
+    mod bit_math;
+    mod bitshift_trait;
+    mod full_math;
+    mod math_utils;
     mod position;
     mod swap_math;
     mod sqrt_price_math;
