@@ -104,7 +104,7 @@ mod PoolSwapTest {
             recipient: ContractAddress,
             sqrt_price_limit_X96: u256
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible
@@ -129,7 +129,7 @@ mod PoolSwapTest {
             recipient: ContractAddress,
             sqrt_price_limit_X96: u256
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible
@@ -154,7 +154,7 @@ mod PoolSwapTest {
             recipient: ContractAddress,
             sqrt_price_limit_X96: u256
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible
@@ -179,7 +179,7 @@ mod PoolSwapTest {
             recipient: ContractAddress,
             sqrt_price_limit_X96: u256
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible
@@ -203,7 +203,7 @@ mod PoolSwapTest {
             sqrt_price_X96: u256,
             recipient: ContractAddress
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible
@@ -227,7 +227,7 @@ mod PoolSwapTest {
             sqrt_price_X96: u256,
             recipient: ContractAddress
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible
@@ -252,7 +252,7 @@ mod PoolSwapTest {
             pool_output: ContractAddress,
             amount0_out: u256
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_output };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible
@@ -278,7 +278,7 @@ mod PoolSwapTest {
             pool_output: ContractAddress,
             amount1_out: u256
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_output };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible

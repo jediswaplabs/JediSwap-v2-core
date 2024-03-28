@@ -175,8 +175,6 @@ mod JediSwapV2Pool {
     use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
     use jediswap_v2_core::libraries::full_math::mul_div;
 
-    use snforge_std::PrintTrait;
-
     component!(path: PositionComponent, storage: position_storage, event: PositionEvent);
     component!(path: TickComponent, storage: tick_storage, event: TickEvent);
     component!(path: TickBitmapComponent, storage: tick_bitmap_storage, event: TickBitmapEvent);
@@ -1142,7 +1140,7 @@ mod JediSwapV2Pool {
         }
 
         fn _unlock(ref self: ContractState) {
-            let locked = self.unlocked.read();
+            // let _locked = self.unlocked.read();
             self.unlocked.write(true);
         }
 

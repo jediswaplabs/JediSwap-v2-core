@@ -32,9 +32,9 @@ fn token1() -> ContractAddress {
 }
 
 fn token0_1() -> (ContractAddress, ContractAddress) {
-    let erc20_class = declare('ERC20');
-    let token0_name = 'token0';
-    let token0_symbol = 'TOK0';
+    let erc20_class = declare("ERC20");
+    let token0_name: ByteArray = "token0";
+    let token0_symbol: ByteArray = "TOK0";
     let initial_supply: u256 = 200 * pow(10, 18) * pow(10, 18);
 
     let mut token0_constructor_calldata = Default::default();
@@ -44,8 +44,8 @@ fn token0_1() -> (ContractAddress, ContractAddress) {
     Serde::serialize(@user1(), ref token0_constructor_calldata);
     let token0_address = erc20_class.deploy(@token0_constructor_calldata).unwrap();
 
-    let token1_name = 'token1';
-    let token1_symbol = 'TOK1';
+    let token1_name: ByteArray = "token1";
+    let token1_symbol: ByteArray = "TOK1";
     let initial_supply: u256 = 200 * pow(10, 18) * pow(10, 18);
 
     let mut token1_constructor_calldata = Default::default();
@@ -77,9 +77,9 @@ fn token0_1() -> (ContractAddress, ContractAddress) {
 }
 
 fn token0_1_2() -> (ContractAddress, ContractAddress, ContractAddress) {
-    let erc20_class = declare('ERC20');
-    let token0_name = 'token0';
-    let token0_symbol = 'TOK0';
+    let erc20_class = declare("ERC20");
+    let token0_name: ByteArray = "token0";
+    let token0_symbol: ByteArray = "TOK0";
     let initial_supply: u256 = 200 * pow(10, 18) * pow(10, 18);
 
     let mut token0_constructor_calldata = Default::default();
@@ -89,8 +89,8 @@ fn token0_1_2() -> (ContractAddress, ContractAddress, ContractAddress) {
     Serde::serialize(@user1(), ref token0_constructor_calldata);
     let token0_address = erc20_class.deploy(@token0_constructor_calldata).unwrap();
 
-    let token1_name = 'token1';
-    let token1_symbol = 'TOK1';
+    let token1_name: ByteArray = "token1";
+    let token1_symbol: ByteArray = "TOK1";
     let initial_supply: u256 = 200 * pow(10, 18) * pow(10, 18);
 
     let mut token1_constructor_calldata = Default::default();
@@ -100,8 +100,8 @@ fn token0_1_2() -> (ContractAddress, ContractAddress, ContractAddress) {
     Serde::serialize(@user1(), ref token1_constructor_calldata);
     let token1_address = erc20_class.deploy(@token1_constructor_calldata).unwrap();
 
-    let token2_name = 'token2';
-    let token2_symbol = 'TOK2';
+    let token2_name: ByteArray = "token2";
+    let token2_symbol: ByteArray = "TOK2";
     let initial_supply: u256 = 200 * pow(10, 18) * pow(10, 18);
 
     let mut token2_constructor_calldata = Default::default();

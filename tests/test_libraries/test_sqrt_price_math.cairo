@@ -6,7 +6,6 @@ use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{
 use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
 use jediswap_v2_core::libraries::math_utils::pow;
 use jediswap_v2_core::libraries::full_math::mul_div;
-use snforge_std::PrintTrait;
 
 fn expand_to_18_decimals(n: u256) -> u256 {
     n * pow(10, 18)

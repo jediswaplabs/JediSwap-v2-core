@@ -20,7 +20,7 @@ use jediswap_v2_core::test_contracts::pool_swap_test::{
 };
 use openzeppelin::security::pausable::PausableComponent;
 use snforge_std::{
-    PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
+    declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
 use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
@@ -32,9 +32,9 @@ use super::utils::{owner, user1, token0_1};
 
 fn setup_factory() -> (ContractAddress, ContractAddress) {
     let owner = owner();
-    let pool_class = declare('JediSwapV2Pool');
+    let pool_class = declare("JediSwapV2Pool");
 
-    let factory_class = declare('JediSwapV2Factory');
+    let factory_class = declare("JediSwapV2Factory");
     let mut factory_constructor_calldata = Default::default();
     Serde::serialize(@owner, ref factory_constructor_calldata);
     Serde::serialize(@pool_class.class_hash, ref factory_constructor_calldata);
@@ -44,8 +44,10 @@ fn setup_factory() -> (ContractAddress, ContractAddress) {
 
 fn create_pool() -> (ContractAddress, ContractAddress, ContractAddress) {
     let (owner, factory_address) = setup_factory();
+
     let fee = 3000;
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+    
     let (token0, token1) = token0_1();
 
     factory_dispatcher.create_pool(token0, token1, fee);
@@ -101,7 +103,7 @@ fn initialize_pool_1_10() -> (ContractAddress, ContractAddress, ContractAddress)
 }
 
 fn get_pool_mint_test_dispatcher() -> IPoolMintTestDispatcher {
-    let pool_mint_test_class = declare('PoolMintTest');
+    let pool_mint_test_class = declare("PoolMintTest");
     let mut pool_mint_test_constructor_calldata = Default::default();
 
     let pool_mint_test_address = pool_mint_test_class
@@ -179,7 +181,7 @@ fn test_mint_succeeds_after_unpause() {
 #[test]
 #[should_panic(expected: ('Invalid caller',))]
 fn test_burn_pause_fails_with_wrong_caller() {
-    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+    let (_, _, pool_address) = initialize_pool_1_10();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -189,7 +191,7 @@ fn test_burn_pause_fails_with_wrong_caller() {
 #[test]
 #[should_panic(expected: ('Invalid caller',))]
 fn test_burn_unpause_fails_with_wrong_caller() {
-    let (owner, factory_address, pool_address) = initialize_pool_1_10();
+    let (_, _, pool_address) = initialize_pool_1_10();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -199,9 +201,7 @@ fn test_burn_unpause_fails_with_wrong_caller() {
 #[test]
 #[should_panic(expected: ('Burn Paused',))]
 fn test_burn_fails_when_burn_paused() {
-    let (owner, factory_address, pool_address) = initialize_pool_1_10();
-
-    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+    let (owner, _, pool_address) = initialize_pool_1_10();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
@@ -245,9 +245,7 @@ fn test_burn_fails_when_burn_paused() {
 
 #[test]
 fn test_burn_succeeds_after_burn_unpaused() {
-    let (owner, factory_address, pool_address) = initialize_pool_1_10();
-
-    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+    let (owner, _, pool_address) = initialize_pool_1_10();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
@@ -426,9 +424,7 @@ fn test_burn_succeeds_after_unpause() {
 #[test]
 #[should_panic(expected: ('Burn Paused',))]
 fn test_collect_fails_when_burn_paused() {
-    let (owner, factory_address, pool_address) = initialize_pool_1_10();
-
-    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+    let (owner, _, pool_address) = initialize_pool_1_10();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     start_prank(CheatTarget::One(pool_address), owner);
@@ -436,7 +432,7 @@ fn test_collect_fails_when_burn_paused() {
     stop_prank(CheatTarget::One(pool_address));
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             get_min_tick(),
@@ -449,9 +445,7 @@ fn test_collect_fails_when_burn_paused() {
 
 #[test]
 fn test_collect_succeeds_after_burn_unpaused() {
-    let (owner, factory_address, pool_address) = initialize_pool_1_10();
-
-    let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
+    let (owner, _, pool_address) = initialize_pool_1_10();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
     start_prank(CheatTarget::One(pool_address), owner);
@@ -462,7 +456,7 @@ fn test_collect_succeeds_after_burn_unpaused() {
     stop_prank(CheatTarget::One(pool_address));
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             get_min_tick(),
@@ -486,7 +480,7 @@ fn test_collect_succeeds_when_paused() {
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             get_min_tick(),
@@ -514,7 +508,7 @@ fn test_collect_succeeds_after_unpause() {
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             get_min_tick(),
@@ -526,7 +520,7 @@ fn test_collect_succeeds_after_unpause() {
 }
 
 fn get_pool_swap_test_dispatcher() -> IPoolSwapTestDispatcher {
-    let pool_swap_test_class = declare('PoolSwapTest');
+    let pool_swap_test_class = declare("PoolSwapTest");
     let mut pool_swap_test_constructor_calldata = Default::default();
 
     let pool_swap_test_address = pool_swap_test_class
@@ -546,8 +540,7 @@ fn test_swap_fails_when_paused() {
     start_prank(CheatTarget::One(factory_address), owner);
     factory_dispatcher.pause();
     stop_prank(CheatTarget::One(factory_address));
-
-    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+    
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
     start_prank(CheatTarget::One(pool_swap_test_dispatcher.contract_address), user1());
@@ -569,8 +562,7 @@ fn test_swap_enters_after_unpause() {
     start_prank(CheatTarget::One(factory_address), owner);
     factory_dispatcher.unpause();
     stop_prank(CheatTarget::One(factory_address));
-
-    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
+    
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
     start_prank(CheatTarget::One(pool_swap_test_dispatcher.contract_address), user1());

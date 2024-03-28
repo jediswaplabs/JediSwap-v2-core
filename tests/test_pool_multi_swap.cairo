@@ -25,7 +25,7 @@ use jediswap_v2_core::test_contracts::pool_swap_test::{
 };
 use jediswap_v2_core::libraries::position::{PositionKey, PositionInfo};
 use snforge_std::{
-    PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
+    declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
 
@@ -41,9 +41,9 @@ fn get_max_tick() -> i32 {
 
 fn setup_factory() -> (ContractAddress, ContractAddress) {
     let owner = owner();
-    let pool_class = declare('JediSwapV2Pool');
+    let pool_class = declare("JediSwapV2Pool");
 
-    let factory_class = declare('JediSwapV2Factory');
+    let factory_class = declare("JediSwapV2Factory");
     let mut factory_constructor_calldata = Default::default();
     Serde::serialize(@owner, ref factory_constructor_calldata);
     Serde::serialize(@pool_class.class_hash, ref factory_constructor_calldata);
@@ -52,7 +52,7 @@ fn setup_factory() -> (ContractAddress, ContractAddress) {
 }
 
 fn create_pools() -> (ContractAddress, ContractAddress) {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let fee = 3000;
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
     let (token0, token1, token2) = token0_1_2();
@@ -79,7 +79,7 @@ fn initialize_pools_1_1() -> (ContractAddress, ContractAddress) {
 }
 
 fn get_pool_mint_test_dispatcher() -> IPoolMintTestDispatcher {
-    let pool_mint_test_class = declare('PoolMintTest');
+    let pool_mint_test_class = declare("PoolMintTest");
     let mut pool_mint_test_constructor_calldata = Default::default();
 
     let pool_mint_test_address = pool_mint_test_class
@@ -90,7 +90,7 @@ fn get_pool_mint_test_dispatcher() -> IPoolMintTestDispatcher {
 }
 
 fn get_pool_swap_test_dispatcher() -> IPoolSwapTestDispatcher {
-    let pool_swap_test_class = declare('PoolSwapTest');
+    let pool_swap_test_class = declare("PoolSwapTest");
     let mut pool_swap_test_constructor_calldata = Default::default();
 
     let pool_swap_test_address = pool_swap_test_class
@@ -158,15 +158,13 @@ fn initiate_pools_1_1_with_intial_mint() -> (
 
 #[test]
 fn test_multi_swap() {
-    let (pool_0_1_address, pool_1_2_address, pool_mint_test_dispatcher) =
+    let (pool_0_1_address, pool_1_2_address, _) =
         initiate_pools_1_1_with_intial_mint();
 
     let pool_0_1_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_0_1_address };
     let pool_1_2_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_1_2_address };
 
     let input_token = pool_0_1_dispatcher.get_token0();
-    let output_token = pool_1_2_dispatcher.get_token1();
-    let token1 = pool_0_1_dispatcher.get_token1();
 
     assert(pool_0_1_dispatcher.get_token1() == pool_1_2_dispatcher.get_token0(), 'Pool mismatch');
 

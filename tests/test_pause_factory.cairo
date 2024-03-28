@@ -7,7 +7,7 @@ use jediswap_v2_core::jediswap_v2_factory::{
 };
 use openzeppelin::security::pausable::PausableComponent;
 use snforge_std::{
-    PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
+    declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
 
@@ -17,9 +17,9 @@ use super::utils::{owner, new_owner, token0, token1};
 
 fn setup_factory() -> (ContractAddress, ContractAddress) {
     let owner = owner();
-    let pool_class = declare('JediSwapV2Pool');
+    let pool_class = declare("JediSwapV2Pool");
 
-    let factory_class = declare('JediSwapV2Factory');
+    let factory_class = declare("JediSwapV2Factory");
     let mut factory_constructor_calldata = Default::default();
     Serde::serialize(@owner, ref factory_constructor_calldata);
     Serde::serialize(@pool_class.class_hash, ref factory_constructor_calldata);
@@ -30,7 +30,7 @@ fn setup_factory() -> (ContractAddress, ContractAddress) {
 #[test]
 #[should_panic(expected: ('Caller is not the owner',))]
 fn test_pause_fails_with_wrong_caller() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
@@ -80,7 +80,7 @@ fn test_create_pool_fails_when_paused() {
 #[test]
 #[should_panic(expected: ('Caller is not the owner',))]
 fn test_unpause_fails_with_wrong_caller() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 

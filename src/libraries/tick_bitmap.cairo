@@ -18,7 +18,6 @@ mod TickBitmapComponent {
     use jediswap_v2_core::libraries::bit_math::{most_significant_bit, least_significant_bit};
     use jediswap_v2_core::libraries::signed_integers::{i16::i16, i32::i32, integer_trait::IntegerTrait};
     use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
-    use snforge_std::PrintTrait;
 
     #[storage]
     struct Storage {

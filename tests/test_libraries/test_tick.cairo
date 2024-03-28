@@ -1,7 +1,6 @@
 use integer::BoundedInt;
 use jediswap_v2_core::libraries::tick::{TickInfo, TickComponent::{Tick, InternalImpl}};
 use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
-use snforge_std::PrintTrait;
 
 #[starknet::contract]
 mod TickMock {

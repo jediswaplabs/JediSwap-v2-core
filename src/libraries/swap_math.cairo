@@ -7,7 +7,6 @@ mod SwapMath {
         get_amount0_delta_unsigned, get_amount1_delta_unsigned, get_next_sqrt_price_from_input,
         get_next_sqrt_price_from_output
     };
-    use snforge_std::{PrintTrait};
 
     // @notice Computes the result of swapping some amount in, or amount out, given the parameters of the swap
     // @param sqrt_ratio_current_x96 The current sqrt price of the pool

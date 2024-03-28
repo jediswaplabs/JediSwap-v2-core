@@ -4,7 +4,6 @@ use jediswap_v2_core::libraries::tick_math::TickMath::{
 };
 use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{Q96};
 use jediswap_v2_core::libraries::signed_integers::{i32::i32, integer_trait::IntegerTrait};
-use snforge_std::PrintTrait;
 
 #[test]
 fn test_min_tick_equals_negative_max_tick() {

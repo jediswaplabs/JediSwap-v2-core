@@ -3,7 +3,6 @@ mod SqrtPriceMath {
     use jediswap_v2_core::libraries::signed_integers::{i128::i128, i256::i256, integer_trait::IntegerTrait};
     use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
     use jediswap_v2_core::libraries::full_math::{div_rounding_up, mul_div, mul_div_rounding_up};
-    use snforge_std::{PrintTrait};
 
     const R96: u256 = 96;
     const Q96: u256 = 0x1000000000000000000000000; // 79228162514264337593543950336 2**96

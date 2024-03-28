@@ -26,7 +26,7 @@ use jediswap_v2_core::test_contracts::pool_swap_test::{
 };
 use jediswap_v2_core::libraries::position::{PositionKey, PositionInfo};
 use snforge_std::{
-    PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
+    declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
 
@@ -61,9 +61,9 @@ struct SwapExpectedResults {
 
 fn setup_factory() -> (ContractAddress, ContractAddress) {
     let owner = owner();
-    let pool_class = declare('JediSwapV2Pool');
+    let pool_class = declare("JediSwapV2Pool");
 
-    let factory_class = declare('JediSwapV2Factory');
+    let factory_class = declare("JediSwapV2Factory");
     let mut factory_constructor_calldata = Default::default();
     Serde::serialize(@owner, ref factory_constructor_calldata);
     Serde::serialize(@pool_class.class_hash, ref factory_constructor_calldata);
@@ -104,7 +104,7 @@ fn get_max_liquidity_per_tick(fee: u32) -> u256 {
 }
 
 fn create_pool(fee: u32) -> ContractAddress {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
     let (token0, token1) = token0_1();
 
@@ -143,7 +143,7 @@ fn initialize_pool(fee: u32, price0: u256, price1: u256) -> ContractAddress {
 }
 
 fn get_pool_mint_test_dispatcher() -> IPoolMintTestDispatcher {
-    let pool_mint_test_class = declare('PoolMintTest');
+    let pool_mint_test_class = declare("PoolMintTest");
     let mut pool_mint_test_constructor_calldata = Default::default();
 
     let pool_mint_test_address = pool_mint_test_class
@@ -199,7 +199,7 @@ fn initiate_pool_with_intial_mint(
 fn get_pool_swap_test_dispatcher(
     pool_dispatcher: IJediSwapV2PoolDispatcher
 ) -> IPoolSwapTestDispatcher {
-    let pool_swap_test_class = declare('PoolSwapTest');
+    let pool_swap_test_class = declare("PoolSwapTest");
     let mut pool_swap_test_constructor_calldata = Default::default();
 
     let pool_swap_test_address = pool_swap_test_class
@@ -244,7 +244,7 @@ fn execute_and_test_swap(
     mut sqrt_price_limit: u256,
     expected_results: SwapExpectedResults
 ) {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_with_intial_mint(
+    let (pool_address, _) = initiate_pool_with_intial_mint(
         fee, price0, price1, pool_test_positions
     );
 

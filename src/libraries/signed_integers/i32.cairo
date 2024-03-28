@@ -1,6 +1,5 @@
 use integer::BoundedInt;
 use jediswap_v2_core::libraries::signed_integers::{i16::i16, integer_trait::IntegerTrait};
-use snforge_std::PrintTrait;
 
 
 // i32 represents a signed 32-bit integer.

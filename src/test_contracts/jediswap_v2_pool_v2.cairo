@@ -1140,7 +1140,7 @@ mod JediSwapV2PoolV2 {
         }
 
         fn _unlock(ref self: ContractState) {
-            let locked = self.unlocked.read();
+            // let locked = self.unlocked.read();
             self.unlocked.write(true);
         }
 
