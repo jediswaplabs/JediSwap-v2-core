@@ -37,18 +37,9 @@ fn i32_new(mag: u32, sign: bool) -> i32 {
     i32 { mag, sign }
 }
 
-// Computes the absolute value of the given i32 integer.
-fn i32_abs(a: i32) -> i32 {
-    return i32 { mag: a.mag, sign: false };
-}
-
 impl i32Impl of IntegerTrait<i32, u32> {
     fn new(mag: u32, sign: bool) -> i32 {
         i32_new(mag, sign)
-    }
-
-    fn abs(self: i32) -> i32 {
-        i32_abs(self)
     }
 }
 

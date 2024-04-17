@@ -23,9 +23,6 @@ impl I256BitShift of BitShiftTrait<i256> {
     #[inline(always)]
     fn shl(self: @i256, n: i256) -> i256 {
         let mut new_mag = self.mag.shl(n.mag);
-        if *self.sign && n.mag == 128 {
-            new_mag += 1_u256;
-        };
         // Left shift operation: mag << n
         if *self.sign {
             new_mag = new_mag & BoundedInt::<u256>::max() / 2;
@@ -40,16 +37,17 @@ impl I256BitShift of BitShiftTrait<i256> {
     fn shr(self: @i256, n: i256) -> i256 {
         let mut new_mag = self.mag.shr(n.mag);
         let mut new_sign = *self.sign;
-        if *self.sign && n.mag == 128 {
+        if (*self.sign) {
             new_mag += 1_u256;
         };
-        if new_mag == 0 {
-            if *self.sign {
-                new_sign = true;
-                new_mag = 1;
-            } else {
-                new_sign == false;
-            };
+        if (new_mag == 0) {
+            new_sign == false;
+            // if (*self.sign) {
+            //     new_sign = true;
+            //     new_mag = 1;
+            // } else {
+            //     new_sign == false;
+            // };
         };
         // Right shift operation: mag >> n
         IntegerTrait::<i256>::new(new_mag, new_sign)

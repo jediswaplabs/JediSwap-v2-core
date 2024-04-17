@@ -172,7 +172,6 @@ mod JediSwapV2PoolV2 {
         IJediSwapV2FactoryDispatcher, IJediSwapV2FactoryDispatcherTrait
     };
     use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, i256::i256, integer_trait::IntegerTrait};
-    use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
     use jediswap_v2_core::libraries::full_math::mul_div;
 
     component!(path: PositionComponent, storage: position_storage, event: PositionEvent);

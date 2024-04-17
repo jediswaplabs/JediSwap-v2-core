@@ -31,7 +31,7 @@ mod TickMath {
     // @return A Fixed point Q64.96 number representing the sqrt of the ratio of the two assets (token1/token0)
     // at the given tick`
     fn get_sqrt_ratio_at_tick(tick: i32) -> u256 {
-        assert(tick.abs() <= MAX_TICK(), 'Invalid Tick');
+        assert(IntegerTrait::<i32>::new(tick.mag, false) <= MAX_TICK(), 'Invalid Tick');
 
         let abs_tick: u256 = tick.mag.into();
         let mut ratio = if ((abs_tick & 0x1) != 0) {

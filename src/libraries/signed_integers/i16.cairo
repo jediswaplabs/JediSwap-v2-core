@@ -37,18 +37,9 @@ fn i16_new(mag: u16, sign: bool) -> i16 {
     i16 { mag, sign }
 }
 
-// Computes the absolute value of the given i16 integer.
-fn i16_abs(a: i16) -> i16 {
-    return i16 { mag: a.mag, sign: false };
-}
-
 impl i16Impl of IntegerTrait<i16, u16> {
     fn new(mag: u16, sign: bool) -> i16 {
         i16_new(mag, sign)
-    }
-
-    fn abs(self: i16) -> i16 {
-        i16_abs(self)
     }
 }
 

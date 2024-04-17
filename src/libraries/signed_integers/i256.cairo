@@ -37,18 +37,9 @@ fn i256_new(mag: u256, sign: bool) -> i256 {
     i256 { mag, sign }
 }
 
-// Computes the absolute value of the given i256 integer.
-fn i256_abs(a: i256) -> i256 {
-    return i256 { mag: a.mag, sign: false };
-}
-
 impl i256Impl of IntegerTrait<i256, u256> {
     fn new(mag: u256, sign: bool) -> i256 {
         i256_new(mag, sign)
-    }
-
-    fn abs(self: i256) -> i256 {
-        i256_abs(self)
     }
 }
 

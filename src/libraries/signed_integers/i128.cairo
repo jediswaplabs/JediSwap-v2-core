@@ -37,18 +37,9 @@ fn i128_new(mag: u128, sign: bool) -> i128 {
     i128 { mag, sign }
 }
 
-// Computes the absolute value of the given i128 integer.
-fn i128_abs(a: i128) -> i128 {
-    return i128 { mag: a.mag, sign: false };
-}
-
 impl i128Impl of IntegerTrait<i128, u128> {
     fn new(mag: u128, sign: bool) -> i128 {
         i128_new(mag, sign)
-    }
-
-    fn abs(self: i128) -> i128 {
-        i128_abs(self)
     }
 }
 
