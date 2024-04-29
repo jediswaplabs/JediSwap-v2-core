@@ -18,11 +18,14 @@ fn main() {
     
     // let pool_class_hash = pool_declare_result.class_hash;
 
-    let pool_class_hash: ClassHash = 0x02f89d2250e88513af8363700b9d8a61a5ea5ac4d46ff7cc3b7dee2035177966.try_into().unwrap();
+    let pool_class_hash: ClassHash = 0x0426a4fb3b82644a07dbab45099214976f880d7aba0d399c88f59297a3cf1aa6.try_into().unwrap();
 
     // let factory_declare_result = declare(
     //     "JediSwapV2Factory", Option::Some(max_fee), Option::None
     // ).expect('factory declare failed');
+
+    // println!("declare_result: {}", factory_declare_result);
+    // println!("debug declare_result: {:?}", factory_declare_result);
     
     // let factory_class_hash = factory_declare_result.class_hash;
 
