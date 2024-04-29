@@ -1,7 +1,7 @@
 use integer::{BoundedInt, u256_wide_mul, u256_safe_divmod, u512_safe_div_rem_by_u256, u256_try_as_non_zero};
 
-// Multiplies two u256 numbers and divides the result by a third.
-// Credits to sphinx-protocol
+// @notice Multiplies two u256 numbers and divides the result by a third.
+// @ dev Credits to sphinx-protocol
 // https://github.com/sphinx-protocol/types252/blob/c5d209fe2b4c2cb2a21f9ad463de13d2c5dffa46/src/math/math.cairo#L37  
 fn mul_div(a: u256, b: u256, denominator: u256) -> u256 {
     let product = u256_wide_mul(a, b);
@@ -12,7 +12,7 @@ fn mul_div(a: u256, b: u256, denominator: u256) -> u256 {
     u256 { low: q.limb0, high: q.limb1 }
 }
 
-// Calculates ceil(a×b÷denominator). Throws if result overflows a uint256 or denominator == 0
+// @notice Calculates ceil(a×b÷denominator). Throws if result overflows a uint256 or denominator == 0
 fn mul_div_rounding_up(a: u256, b: u256, denominator: u256) -> u256 {
     let result: u256 = mul_div(a, b, denominator);
     let max_u256: u256 = BoundedInt::max();

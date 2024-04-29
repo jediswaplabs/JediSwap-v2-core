@@ -109,7 +109,7 @@ mod TickMath {
         };
         // this divides by 1<<32 rounding up to go from a Q128.128 to a Q128.96.
         // we round up in the division so get_tick_at_sqrt_ratio of the output price is always consistent
-        return ((ratio.shr(32)) + to_add); // & ((1.shl(160)) - 1); TODO check this casting
+        return ((ratio.shr(32)) + to_add);
     }
 
     // Returns 1 if a > b, otherwise returns 0.

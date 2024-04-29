@@ -154,32 +154,6 @@ fn i256_div(lhs: i256, rhs: i256) -> i256 {
     let sign = lhs.sign ^ rhs.sign;
 
     return ensure_zero_sign_and_check_overflow(i256 { mag: lhs.mag / rhs.mag, sign: sign });
-
-    // TODO check the rounding
-
-    // if (sign == false) {
-    //     // If the operands are positive, the quotient is simply their absolute value quotient.
-    //     return i256 { mag: lhs.mag / rhs.mag, sign: sign };
-    // }
-
-    // // If the operands have different signs, rounding is necessary.
-    // // First, check if the quotient is an integer.
-    // if (lhs.mag % rhs.mag == 0) {
-    //     return i256 { mag: lhs.mag / rhs.mag, sign: sign };
-    // }
-    
-    // return i256 { mag: lhs.mag / rhs.mag, sign: sign };
-
-    // // // If the quotient is not an integer, multiply the dividend by 10 to move the decimal point over.
-    // // let quotient = (lhs.mag * 10) / rhs.mag;
-    // // let last_digit = quotient % 10;
-
-    // // // Check the last digit to determine rounding direction.
-    // // if (last_digit <= 5) {
-    // //     return i256 { mag: quotient / 10, sign: sign };
-    // // } else {
-    // //     return i256 { mag: (quotient / 10) + 1, sign: sign };
-    // // }
 }
 
 // Implements the Div trait for i256.

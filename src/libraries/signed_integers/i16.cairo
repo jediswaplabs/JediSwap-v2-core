@@ -155,31 +155,6 @@ fn i16_div(lhs: i16, rhs: i16) -> i16 {
 
     return ensure_zero_sign_and_check_overflow(i16 { mag: lhs.mag / rhs.mag, sign: sign });
 
-    // TODO check the rounding
-
-    // if (sign == false) {
-    //     // If the operands are positive, the quotient is simply their absolute value quotient.
-    //     return i16 { mag: lhs.mag / rhs.mag, sign: sign };
-    // }
-
-    // // If the operands have different signs, rounding is necessary.
-    // // First, check if the quotient is an integer.
-    // if (lhs.mag % rhs.mag == 0) {
-    //     return i16 { mag: lhs.mag / rhs.mag, sign: sign };
-    // }
-    
-    // return i16 { mag: lhs.mag / rhs.mag, sign: sign };
-
-    // // If the quotient is not an integer, multiply the dividend by 10 to move the decimal point over.
-    // let quotient = (lhs.mag * 10) / rhs.mag;
-    // let last_digit = quotient % 10;
-
-    // // Check the last digit to determine rounding direction.
-    // if (last_digit <= 5) {
-    //     return i16 { mag: quotient / 10, sign: sign };
-    // } else {
-    //     return i16 { mag: (quotient / 10) + 1, sign: sign };
-    // }
 }
 
 // Implements the Div trait for i16.

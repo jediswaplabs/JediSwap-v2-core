@@ -1,6 +1,6 @@
 use integer::BoundedInt;
 
-// Raise a number to a power.
+// @notice Raise a number to a power.
 fn pow(base: u256, exp: u256) -> u256 {
     if exp == 0 {
         1

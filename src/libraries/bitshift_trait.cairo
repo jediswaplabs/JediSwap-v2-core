@@ -40,13 +40,9 @@ impl I256BitShift of BitShiftTrait<i256> {
     fn shl(self: @i256, n: i256) -> i256 {
         let mut new_mag = self.mag.shl(n.mag);
         // Left shift operation: mag << n
+        
         // Doesn't support solidity type(int256).min
         new_mag = new_mag & ((BoundedInt::<u256>::max() / 2));
-        // if (*self.sign) {
-        //     new_mag = new_mag & ((BoundedInt::<u256>::max() / 2) + 1);
-        // } else {
-        //     new_mag = new_mag & ((BoundedInt::<u256>::max() / 2));
-        // };
 
         IntegerTrait::<i256>::new(new_mag, *self.sign)
     }

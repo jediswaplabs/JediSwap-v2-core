@@ -9,8 +9,8 @@ trait ITickBitmap<TState> {
 }
 
 
-// Packed tick initialized state library
-// Stores a packed mapping of tick index to its initialized state
+// @notice Packed tick initialized state library
+// @dev Stores a packed mapping of tick index to its initialized state
 // The mapping uses i16 for keys since ticks are max i24 and there are 256 (2^8) values per word.
 #[starknet::component]
 mod TickBitmapComponent {

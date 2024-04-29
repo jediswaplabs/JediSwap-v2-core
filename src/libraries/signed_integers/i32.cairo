@@ -154,32 +154,6 @@ fn i32_div(lhs: i32, rhs: i32) -> i32 {
     let sign = lhs.sign ^ rhs.sign;
 
     return ensure_zero_sign_and_check_overflow(i32 { mag: lhs.mag / rhs.mag, sign: sign });
-
-    // TODO check the rounding
-
-    // if (sign == false) {
-    //     // If the operands are positive, the quotient is simply their absolute value quotient.
-    //     return i32 { mag: lhs.mag / rhs.mag, sign: sign };
-    // }
-
-    // // If the operands have different signs, rounding is necessary.
-    // // First, check if the quotient is an integer.
-    // if (lhs.mag % rhs.mag == 0) {
-    //     return i32 { mag: lhs.mag / rhs.mag, sign: sign };
-    // }
-    
-    // return i32 { mag: lhs.mag / rhs.mag, sign: sign };
-
-    // // // If the quotient is not an integer, multiply the dividend by 10 to move the decimal point over.
-    // // let quotient = (lhs.mag * 10) / rhs.mag;
-    // // let last_digit = quotient % 10;
-
-    // // // Check the last digit to determine rounding direction.
-    // // if (last_digit <= 5) {
-    // //     return i32 { mag: quotient / 10, sign: sign };
-    // // } else {
-    // //     return i32 { mag: (quotient / 10) + 1, sign: sign };
-    // // }
 }
 
 // Implements the Div trait for i32.
