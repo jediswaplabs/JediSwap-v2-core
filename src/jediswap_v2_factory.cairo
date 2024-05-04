@@ -110,7 +110,6 @@ mod JediSwapV2Factory {
 
     #[storage]
     struct Storage {
-        owner: ContractAddress,
         fee_amount_tick_spacing: LegacyMap::<u32, u32>,
         pool: LegacyMap<(ContractAddress, ContractAddress, u32), ContractAddress>,
         pool_class_hash: ClassHash,

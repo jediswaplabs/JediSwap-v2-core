@@ -820,7 +820,6 @@ mod JediSwapV2PoolV2 {
             }
 
             // update fee growth global and, if necessary, protocol fees
-            // overflow is acceptable, protocol has to withdraw before it hits type(uint128).max fees
             if (zero_for_one) {
                 self.fee_growth_global_0_X128.write(state.fee_growth_global_X128);
                 if (state.protocol_fee > 0) {

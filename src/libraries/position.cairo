@@ -128,7 +128,6 @@ mod PositionComponent {
             position_info.fee_growth_inside_1_last_X128 = fee_growth_inside_1_X128;
 
             if (tokens_owed_0 > 0 || tokens_owed_1 > 0) {
-                // overflow is acceptable, have to withdraw before you hit Q128 fees
                 position_info.tokens_owed_0 += tokens_owed_0;
                 position_info.tokens_owed_1 += tokens_owed_1;
             }
