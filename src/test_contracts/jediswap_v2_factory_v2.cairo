@@ -2,7 +2,7 @@
 // @notice Deploys JediSwap V2 pools and manages ownership and control over pool protocol fees
 
 use starknet::{ContractAddress, ClassHash};
-use yas_core::numbers::signed_integer::{i32::i32};
+use jediswap_v2_core::libraries::signed_integers::i32::i32;
 
 #[starknet::interface]
 trait IJediSwapV2FactoryV2<TContractState> {
@@ -19,6 +19,8 @@ trait IJediSwapV2FactoryV2<TContractState> {
     fn enable_fee_amount(ref self: TContractState, fee: u32, tick_spacing: u32);
     fn set_fee_protocol(ref self: TContractState, fee_protocol: u8);
     fn upgrade(ref self: TContractState, new_class_hash: ClassHash, new_pool_class_hash: ClassHash);
+    fn pause(ref self: TContractState);
+    fn unpause(ref self: TContractState);
 }
 
 
@@ -32,18 +34,24 @@ mod JediSwapV2FactoryV2 {
         contract_address_to_felt252
     };
     use integer::{u256_from_felt252};
-    use yas_core::numbers::signed_integer::{i32::i32, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::signed_integers::{i32::i32, integer_trait::IntegerTrait};
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::upgrades::upgradeable::UpgradeableComponent;
+    use openzeppelin::security::pausable::PausableComponent;
 
     component!(path: OwnableComponent, storage: ownable_storage, event: OwnableEvent);
     component!(path: UpgradeableComponent, storage: upgradeable_storage, event: UpgradeableEvent);
+    component!(path: PausableComponent, storage: pausable_storage, event: PausableEvent);
 
     #[abi(embed_v0)]
     impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
 
+    #[abi(embed_v0)]
+    impl PausableImpl = PausableComponent::PausableImpl<ContractState>;
+
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
+    impl PausableInternalImpl = PausableComponent::InternalImpl<ContractState>;
 
     #[event]
     #[derive(Drop, starknet::Event)]
@@ -55,7 +63,9 @@ mod JediSwapV2FactoryV2 {
         #[flat]
         OwnableEvent: OwnableComponent::Event,
         #[flat]
-        UpgradeableEvent: UpgradeableComponent::Event
+        UpgradeableEvent: UpgradeableComponent::Event,
+        #[flat]
+        PausableEvent: PausableComponent::Event
     }
 
     // @notice Emitted when a pool is created
@@ -108,7 +118,9 @@ mod JediSwapV2FactoryV2 {
         #[substorage(v0)]
         ownable_storage: OwnableComponent::Storage,
         #[substorage(v0)]
-        upgradeable_storage: UpgradeableComponent::Storage
+        upgradeable_storage: UpgradeableComponent::Storage,
+        #[substorage(v0)]
+        pausable_storage: PausableComponent::Storage
     }
 
     #[constructor]
@@ -133,7 +145,7 @@ mod JediSwapV2FactoryV2 {
         self.fee_protocol.write(0);
     }
 
-    #[external(v0)]
+    #[abi(embed_v0)]
     impl JediSwapV2FactoryV2Impl of super::IJediSwapV2FactoryV2<ContractState> {
         // @notice Returns the tick spacing for a given fee amount, if enabled, or 0 if not enabled
         // @dev A fee amount can never be removed, so this value should be hard coded or cached in the calling context
@@ -179,6 +191,7 @@ mod JediSwapV2FactoryV2 {
         fn create_pool(
             ref self: ContractState, token_a: ContractAddress, token_b: ContractAddress, fee: u32
         ) -> ContractAddress {
+            self.pausable_storage.assert_not_paused();
             assert(token_a != token_b, 'tokens must be different');
             assert(token_a.is_non_zero() && token_b.is_non_zero(), 'tokens must be non zero');
 
@@ -264,9 +277,19 @@ mod JediSwapV2FactoryV2 {
             if (!new_pool_class_hash.is_zero()
                 && self.pool_class_hash.read() != new_pool_class_hash) {
                 self.pool_class_hash.write(new_pool_class_hash);
-                self.emit(UpgradedPoolClassHash { class_hash: new_class_hash });
+                self.emit(UpgradedPoolClassHash { class_hash: new_pool_class_hash });
             }
             self.upgradeable_storage._upgrade(new_class_hash);
+        }
+
+        fn pause(ref self: ContractState) {
+            self.ownable_storage.assert_only_owner();
+            self.pausable_storage._pause();
+        }
+
+        fn unpause(ref self: ContractState) {
+            self.ownable_storage.assert_only_owner();
+            self.pausable_storage._unpause();
         }
     }
 }

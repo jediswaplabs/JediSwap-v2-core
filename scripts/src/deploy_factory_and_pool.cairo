@@ -1,51 +1,53 @@
 use sncast_std::{
-    declare, deploy, invoke, call, DeclareResult, DeployResult, InvokeResult, CallResult
+    declare, deploy, invoke, call, get_nonce, DeclareResult, DeployResult, InvokeResult, CallResult, DisplayContractAddress, DisplayClassHash
 };
 use starknet::{ContractAddress, ClassHash};
 use debug::PrintTrait;
 use deploy_scripts::utils::{owner};
 
 fn main() {
-    let max_fee = 9999999999999999;
+    let max_fee = 99999999999999999;
     let salt = 0x6;
-    let starting_nonce = 67; // Change it when running script, TODO get from environment
 
-    let mut current_nonce = starting_nonce;
+    // let pool_declare_result = declare(
+    //     "JediSwapV2Pool", Option::Some(max_fee), Option::None
+    // ).expect('pool declare failed');
 
-    let pool_declare_result = declare(
-        'JediSwapV2Pool', Option::Some(max_fee), Option::Some(current_nonce)
-    );
-    current_nonce = current_nonce + 1;
-    let pool_class_hash = pool_declare_result.class_hash;
+    // println!("declare_result: {}", pool_declare_result);
+    // println!("debug declare_result: {:?}", pool_declare_result);
+    
+    // let pool_class_hash = pool_declare_result.class_hash;
 
-    // let pool_class_hash: ClassHash = 0x0698b456644c45c98030089afc0446b2932e0916316138912cbc1a48c283e7df.try_into().unwrap();
+    let pool_class_hash: ClassHash = 0x0426a4fb3b82644a07dbab45099214976f880d7aba0d399c88f59297a3cf1aa6.try_into().unwrap();
 
-    let factory_declare_result = declare(
-        'JediSwapV2Factory', Option::Some(max_fee), Option::Some(current_nonce)
-    );
-    current_nonce = current_nonce + 1;
-    let factory_class_hash = factory_declare_result.class_hash;
+    // let factory_declare_result = declare(
+    //     "JediSwapV2Factory", Option::Some(max_fee), Option::None
+    // ).expect('factory declare failed');
 
-    // let factory_class_hash: ClassHash = 0x064704128c6639e831cf09972115860a3b63ca108da1d68faa67a93532193763.try_into().unwrap();
+    // println!("declare_result: {}", factory_declare_result);
+    // println!("debug declare_result: {:?}", factory_declare_result);
+    
+    // let factory_class_hash = factory_declare_result.class_hash;
+
+    let factory_class_hash: ClassHash = 0x00e1042bf425002e0664d8316f0d10ff27c37acc3f9a97596af34a1eb6853cba.try_into().unwrap();
 
     let mut factory_constructor_data = Default::default();
     Serde::serialize(@owner(), ref factory_constructor_data);
     Serde::serialize(@pool_class_hash, ref factory_constructor_data);
+    // let current_nonce = get_nonce('latest');
     let factory_deploy_result = deploy(
         factory_class_hash,
         factory_constructor_data,
         Option::Some(salt),
         true,
         Option::Some(max_fee),
-        Option::Some(current_nonce)
-    );
-    current_nonce = current_nonce + 1;
+        Option::None
+    ).expect('factory deploy failed');
     let factory_contract_address = factory_deploy_result.contract_address;
 
     // let factory_contract_address: ContractAddress = 0x6b4115fa43c48118d3f79fbc500c75917c8a28d0f867479acb81893ea1e036c.try_into().unwrap(); //TODO environment variable
 
-    'Factory Deployed to '.print();
-    factory_contract_address.print();
+    println!("Factory Deployed to {}", factory_contract_address);
 // let token0: ContractAddress = 1.try_into().unwrap();
 // let token1: ContractAddress = 2.try_into().unwrap();
 // let fee: u32 = 100;

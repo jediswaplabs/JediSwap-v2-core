@@ -1,10 +1,8 @@
 mod TickMath {
     use integer::BoundedInt;
 
-    use yas_core::numbers::signed_integer::{
-        i32::i32, integer_trait::IntegerTrait, i256::{i256, bitwise_or}
-    };
-    use yas_core::utils::math_utils::BitShift::BitShiftTrait;
+    use jediswap_v2_core::libraries::signed_integers::{i32::i32, i256::{i256, bitwise_or}, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
 
     impl i256TryIntoi32 of TryInto<i256, i32> {
         fn try_into(self: i256) -> Option<i32> {
@@ -33,7 +31,7 @@ mod TickMath {
     // @return A Fixed point Q64.96 number representing the sqrt of the ratio of the two assets (token1/token0)
     // at the given tick`
     fn get_sqrt_ratio_at_tick(tick: i32) -> u256 {
-        assert(tick.abs() <= MAX_TICK(), 'Invalid Tick');
+        assert(IntegerTrait::<i32>::new(tick.mag, false) <= MAX_TICK(), 'Invalid Tick');
 
         let abs_tick: u256 = tick.mag.into();
         let mut ratio = if ((abs_tick & 0x1) != 0) {
@@ -111,7 +109,7 @@ mod TickMath {
         };
         // this divides by 1<<32 rounding up to go from a Q128.128 to a Q128.96.
         // we round up in the division so get_tick_at_sqrt_ratio of the output price is always consistent
-        return ((ratio.shr(32)) + to_add); // & ((1.shl(160)) - 1); TODO check this casting
+        return ((ratio.shr(32)) + to_add);
     }
 
     // Returns 1 if a > b, otherwise returns 0.

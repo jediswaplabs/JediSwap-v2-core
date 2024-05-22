@@ -1,7 +1,7 @@
 use starknet::{ContractAddress, contract_address_try_from_felt252};
 use integer::BoundedInt;
-use yas_core::numbers::signed_integer::{i32::i32, i128::i128, integer_trait::IntegerTrait};
-use yas_core::utils::math_utils::{pow};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::math_utils::pow;
 use openzeppelin::token::erc20::{
     ERC20Component, interface::{IERC20Dispatcher, IERC20DispatcherTrait}
 };
@@ -23,7 +23,7 @@ use jediswap_v2_core::test_contracts::pool_swap_test::{
 };
 use jediswap_v2_core::libraries::position::{PositionKey, PositionInfo};
 use snforge_std::{
-    PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
+    declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
 
@@ -33,9 +33,9 @@ use super::utils::{owner, user1, user2, token0_1};
 
 fn setup_factory() -> (ContractAddress, ContractAddress) {
     let owner = owner();
-    let pool_class = declare('JediSwapV2Pool');
+    let pool_class = declare("JediSwapV2Pool");
 
-    let factory_class = declare('JediSwapV2Factory');
+    let factory_class = declare("JediSwapV2Factory");
     let mut factory_constructor_calldata = Default::default();
     Serde::serialize(@owner, ref factory_constructor_calldata);
     Serde::serialize(@pool_class.class_hash, ref factory_constructor_calldata);
@@ -44,7 +44,7 @@ fn setup_factory() -> (ContractAddress, ContractAddress) {
 }
 
 fn create_pool() -> ContractAddress {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let fee = 3000;
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
     let (token0, token1) = token0_1();
@@ -67,7 +67,7 @@ fn initialize_pool_1_10() -> ContractAddress {
 }
 
 fn get_pool_mint_test_dispatcher() -> IPoolMintTestDispatcher {
-    let pool_mint_test_class = declare('PoolMintTest');
+    let pool_mint_test_class = declare("PoolMintTest");
     let mut pool_mint_test_constructor_calldata = Default::default();
 
     let pool_mint_test_address = pool_mint_test_class
@@ -78,7 +78,7 @@ fn get_pool_mint_test_dispatcher() -> IPoolMintTestDispatcher {
 }
 
 fn get_pool_swap_test_dispatcher() -> IPoolSwapTestDispatcher {
-    let pool_swap_test_class = declare('PoolSwapTest');
+    let pool_swap_test_class = declare("PoolSwapTest");
     let mut pool_swap_test_constructor_calldata = Default::default();
 
     let pool_swap_test_address = pool_swap_test_class
@@ -448,10 +448,6 @@ fn test_mint_fails_if_amount_is_0() {
 
     let pool_mint_test_dispatcher = get_pool_mint_test_dispatcher();
 
-    let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
-
-    let max_liquidity_gross = pool_dispatcher.get_max_liquidity_per_tick();
-
     pool_mint_test_dispatcher
         .mint(
             pool_address,
@@ -464,7 +460,7 @@ fn test_mint_fails_if_amount_is_0() {
 
 #[test]
 fn test_mint_succeeds_initial_balances() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_10_with_intial_mint();
+    let (pool_address, _) = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -477,7 +473,7 @@ fn test_mint_succeeds_initial_balances() {
 
 #[test]
 fn test_mint_succeeds_initial_tick() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_10_with_intial_mint();
+    let (pool_address, _) = initiate_pool_1_10_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -1511,7 +1507,7 @@ fn test_liquidity_returns_0_before_initialization() {
 
 #[test]
 fn test_liquidity_post_initialized_returns_initial_liquidity() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -1598,7 +1594,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_exiting_range() {
 
     let k_before = pool_dispatcher.get_liquidity();
 
-    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity');
+    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity 1');
 
     // add liquidity at and above current tick
     start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
@@ -1614,7 +1610,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_exiting_range() {
 
     let k_after = pool_dispatcher.get_liquidity();
 
-    assert(k_after == 3 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity');
+    assert(k_after == 3 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity 2');
 
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
@@ -1632,7 +1628,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_exiting_range() {
 
     assert(
         pool_dispatcher.get_liquidity() == 2 * pow(10, 18).try_into().unwrap(),
-        'Incorrect liquidity'
+        'Incorrect liquidity 3'
     );
 }
 
@@ -1644,7 +1640,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_entering_range() {
 
     let k_before = pool_dispatcher.get_liquidity();
 
-    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity');
+    assert(k_before == 2 * pow(10, 18).try_into().unwrap(), 'Incorrect liquidity 1');
 
     // add liquidity below current tick
     start_prank(CheatTarget::One(pool_mint_test_dispatcher.contract_address), user1());
@@ -1661,7 +1657,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_entering_range() {
     // ensure virtual supply hasn't changed
     let k_after = pool_dispatcher.get_liquidity();
 
-    assert(k_after == k_before, 'Incorrect liquidity');
+    assert(k_after == k_before, 'Incorrect liquidity 2');
 
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
 
@@ -1679,7 +1675,7 @@ fn test_liquidity_post_initialized_updates_correctly_when_entering_range() {
 
     assert(
         pool_dispatcher.get_liquidity() == 3 * pow(10, 18).try_into().unwrap(),
-        'Incorrect liquidity'
+        'Incorrect liquidity 3'
     );
 }
 
@@ -1762,7 +1758,7 @@ fn test_limit_selling_0_for_1_at_tick_0_thru_1() {
     let mut spy = spy_events(SpyOn::One(pool_dispatcher.get_token1()));
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             IntegerTrait::<i32>::new(0, false),
@@ -1870,7 +1866,7 @@ fn test_limit_selling_1_for_0_at_tick_0_thru_minus_1() {
     let mut spy = spy_events(SpyOn::One(pool_dispatcher.get_token0()));
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             IntegerTrait::<i32>::new(120, true),
@@ -1986,7 +1982,7 @@ fn test_limit_selling_0_for_1_at_tick_0_thru_1_fee_is_on() {
     let mut spy = spy_events(SpyOn::One(pool_dispatcher.get_token1()));
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             IntegerTrait::<i32>::new(0, false),
@@ -2102,7 +2098,7 @@ fn test_limit_selling_1_for_0_at_tick_0_thru_minus_1_fee_is_on() {
     let mut spy = spy_events(SpyOn::One(pool_dispatcher.get_token0()));
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             IntegerTrait::<i32>::new(120, true),
@@ -2217,7 +2213,7 @@ fn swap_and_get_fees_owed(
 
 #[test]
 fn test_fee_protocol_position_owner_gets_full_fees_when_protocol_fee_is_off() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
     let (token0_fees, token1_fees) = swap_and_get_fees_owed(
         pool_address, pool_swap_test_dispatcher, pow(10, 18), true, true
@@ -2229,7 +2225,7 @@ fn test_fee_protocol_position_owner_gets_full_fees_when_protocol_fee_is_off() {
 
 #[test]
 fn test_fee_protocol_swap_fees_accumulate_as_expected_0_for_1() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
     let (token0_fees, token1_fees) = swap_and_get_fees_owed(
         pool_address, pool_swap_test_dispatcher, pow(10, 18), true, true
@@ -2255,7 +2251,7 @@ fn test_fee_protocol_swap_fees_accumulate_as_expected_0_for_1() {
 
 #[test]
 fn test_fee_protocol_swap_fees_accumulate_as_expected_1_for_0() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
     let (token0_fees, token1_fees) = swap_and_get_fees_owed(
         pool_address, pool_swap_test_dispatcher, pow(10, 18), false, true
@@ -2281,7 +2277,7 @@ fn test_fee_protocol_swap_fees_accumulate_as_expected_1_for_0() {
 
 #[test]
 fn test_fee_protocol_position_owner_gets_partial_fees_when_protocol_fee_is_on() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -2304,7 +2300,7 @@ fn test_fee_protocol_position_owner_gets_partial_fees_when_protocol_fee_is_on() 
 
 #[test]
 fn test_fee_protocol_collect_protocol_returns_0_if_no_fee() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -2329,7 +2325,7 @@ fn test_fee_protocol_collect_protocol_returns_0_if_no_fee() {
 
 #[test]
 fn test_fee_protocol_collect_protocol_can_collect_fee() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -2342,7 +2338,7 @@ fn test_fee_protocol_collect_protocol_can_collect_fee() {
     stop_prank(CheatTarget::One(factory_address));
 
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
-    let (token0_fees, token1_fees) = swap_and_get_fees_owed(
+    let (_, _) = swap_and_get_fees_owed(
         pool_address, pool_swap_test_dispatcher, pow(10, 18), true, true
     );
 
@@ -2357,9 +2353,9 @@ fn test_fee_protocol_collect_protocol_can_collect_fee() {
 
 #[test]
 fn test_fee_protocol_swap_fees_collected_by_lp_after_two_swaps_should_be_double_one_swap() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
-    let (token0_fees, token1_fees) = swap_and_get_fees_owed(
+    let (_, _) = swap_and_get_fees_owed(
         pool_address, pool_swap_test_dispatcher, pow(10, 18), true, true
     );
 
@@ -2373,9 +2369,9 @@ fn test_fee_protocol_swap_fees_collected_by_lp_after_two_swaps_should_be_double_
 
 #[test]
 fn test_fee_protocol_swap_fees_collected_after_two_swaps_with_fee_turned_on_in_the_middle() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
     let pool_swap_test_dispatcher = get_pool_swap_test_dispatcher();
-    let (token0_fees, token1_fees) = swap_and_get_fees_owed(
+    let (_, _) = swap_and_get_fees_owed(
         pool_address, pool_swap_test_dispatcher, pow(10, 18), true, true
     );
 
@@ -2399,7 +2395,7 @@ fn test_fee_protocol_swap_fees_collected_after_two_swaps_with_fee_turned_on_in_t
 
 #[test]
 fn test_fee_protocol_swap_fees_collected_by_lp_after_two_swaps_with_intermediate_withdrawal() {
-    let (pool_address, pool_mint_test_dispatcher) = initiate_pool_1_1_with_intial_mint_1000();
+    let (pool_address, _) = initiate_pool_1_1_with_intial_mint_1000();
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
@@ -2420,7 +2416,7 @@ fn test_fee_protocol_swap_fees_collected_by_lp_after_two_swaps_with_intermediate
     assert(token1_fees == 0, 'Incorrect token1_fees');
 
     start_prank(CheatTarget::One(pool_address), user1());
-    let (amount0, amount1) = pool_dispatcher
+    let (_, _) = pool_dispatcher
         .collect(
             user1(),
             get_min_tick(),

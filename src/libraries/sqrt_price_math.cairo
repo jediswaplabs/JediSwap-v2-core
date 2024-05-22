@@ -1,10 +1,8 @@
 mod SqrtPriceMath {
-    use yas_core::numbers::signed_integer::{i128::i128, i256::i256, integer_trait::IntegerTrait};
-    use yas_core::utils::math_utils::{
-        FullMath::{div_rounding_up, mul_div, mul_div_rounding_up}, pow
-    };
-    use yas_core::utils::math_utils::BitShift::BitShiftTrait;
-    use snforge_std::{PrintTrait};
+    use core::integer::u256_overflow_mul;
+    use jediswap_v2_core::libraries::signed_integers::{i128::i128, i256::i256, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
+    use jediswap_v2_core::libraries::full_math::{div_rounding_up, mul_div, mul_div_rounding_up};
 
     const R96: u256 = 96;
     const Q96: u256 = 0x1000000000000000000000000; // 79228162514264337593543950336 2**96
@@ -32,10 +30,10 @@ mod SqrtPriceMath {
         }
 
         let numerator = liquidity.into().shl(R96);
-        let product = amount * sqrt_p_x96;
+        let (product, overflow) = u256_overflow_mul(amount, sqrt_p_x96);
 
         if (add) {
-            if (product / amount == sqrt_p_x96) {
+            if (!overflow) {
                 let denominator = numerator + product;
                 if (denominator >= numerator) {
                     return mul_div_rounding_up(numerator, sqrt_p_x96, denominator);
@@ -45,7 +43,7 @@ mod SqrtPriceMath {
         } else {
             // if the product overflows, we know the denominator underflows
             // in addition, we must check that the denominator does not underflow
-            assert(product / amount == sqrt_p_x96, 'product overflows');
+            assert(!overflow, 'product overflows');
             assert(numerator > product, 'denominator negative');
             let denominator = numerator - product;
             let to_return = mul_div_rounding_up(numerator, sqrt_p_x96, denominator);

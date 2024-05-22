@@ -1,6 +1,6 @@
 use starknet::{ContractAddress, ClassHash};
 
-use yas_core::numbers::signed_integer::{i32::i32, i128::i128, i256::i256};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, i256::i256};
 use jediswap_v2_core::libraries::position::{PositionInfo, PositionKey};
 use jediswap_v2_core::libraries::tick::TickInfo;
 
@@ -171,12 +171,8 @@ mod JediSwapV2Pool {
     use jediswap_v2_core::jediswap_v2_factory::{
         IJediSwapV2FactoryDispatcher, IJediSwapV2FactoryDispatcherTrait
     };
-    use yas_core::numbers::signed_integer::{
-        i32::i32, i64::i64, i128::{i128, u128Intoi128}, i256::{i256, i256TryIntou256},
-        integer_trait::IntegerTrait
-    };
-    use yas_core::utils::math_utils::FullMath::mul_div;
-    use yas_core::utils::math_utils::BitShift::BitShiftTrait;
+    use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, i256::i256, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::full_math::mul_div;
 
     component!(path: PositionComponent, storage: position_storage, event: PositionEvent);
     component!(path: TickComponent, storage: tick_storage, event: TickEvent);
@@ -824,7 +820,6 @@ mod JediSwapV2Pool {
             }
 
             // update fee growth global and, if necessary, protocol fees
-            // overflow is acceptable, protocol has to withdraw before it hits type(uint128).max fees
             if (zero_for_one) {
                 self.fee_growth_global_0_X128.write(state.fee_growth_global_X128);
                 if (state.protocol_fee > 0) {
@@ -1143,7 +1138,7 @@ mod JediSwapV2Pool {
         }
 
         fn _unlock(ref self: ContractState) {
-            let locked = self.unlocked.read();
+            // let _locked = self.unlocked.read();
             self.unlocked.write(true);
         }
 

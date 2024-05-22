@@ -3,7 +3,7 @@
 // @dev Positions store additional state for tracking fees owed to the position
 
 use starknet::ContractAddress;
-use yas_core::numbers::signed_integer::{i32::i32, i128::i128, integer_trait::IntegerTrait};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32, i128::i128, integer_trait::IntegerTrait};
 
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
@@ -48,8 +48,9 @@ mod PositionComponent {
 
     use integer::BoundedInt;
     use poseidon::poseidon_hash_span;
-    use yas_core::numbers::signed_integer::{i128::i128, integer_trait::IntegerTrait};
-    use yas_core::utils::math_utils::FullMath::mul_div;
+    use jediswap_v2_core::libraries::signed_integers::{i128::i128, integer_trait::IntegerTrait};
+    use jediswap_v2_core::libraries::full_math::mul_div;
+    use jediswap_v2_core::libraries::math_utils::mod_subtraction;
     use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::Q128;
 
     #[storage]
@@ -100,14 +101,18 @@ mod PositionComponent {
 
             // calculate accumulated fees
             let tokens_owed_0 = mul_div(
-                fee_growth_inside_0_X128 - position_info.fee_growth_inside_0_last_X128,
+                mod_subtraction(
+                    fee_growth_inside_0_X128, position_info.fee_growth_inside_0_last_X128
+                ),
                 position_info.liquidity.into(),
                 Q128
             )
                 .try_into()
                 .unwrap();
             let tokens_owed_1 = mul_div(
-                fee_growth_inside_1_X128 - position_info.fee_growth_inside_1_last_X128,
+                mod_subtraction(
+                    fee_growth_inside_1_X128, position_info.fee_growth_inside_1_last_X128
+                ),
                 position_info.liquidity.into(),
                 Q128
             )
@@ -123,7 +128,6 @@ mod PositionComponent {
             position_info.fee_growth_inside_1_last_X128 = fee_growth_inside_1_X128;
 
             if (tokens_owed_0 > 0 || tokens_owed_1 > 0) {
-                // overflow is acceptable, have to withdraw before you hit Q128 fees
                 position_info.tokens_owed_0 += tokens_owed_0;
                 position_info.tokens_owed_1 += tokens_owed_1;
             }

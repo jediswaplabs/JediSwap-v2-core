@@ -1,8 +1,6 @@
 use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath;
 use jediswap_v2_core::libraries::swap_math::SwapMath;
-use yas_core::numbers::signed_integer::i256::{i256, i256TryIntou256};
-
-use yas_core::numbers::signed_integer::integer_trait::IntegerTrait;
+use jediswap_v2_core::libraries::signed_integers::{i256::i256, integer_trait::IntegerTrait};
 
 fn expand_to_18_decimals(n: u256) -> u256 {
     n * 1000000000000000000

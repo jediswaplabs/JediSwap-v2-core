@@ -7,7 +7,7 @@ use jediswap_v2_core::jediswap_v2_factory::{
 };
 use jediswap_v2_core::jediswap_v2_pool::{IJediSwapV2PoolDispatcher, IJediSwapV2PoolDispatcherTrait};
 use snforge_std::{
-    PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
+    declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
 use openzeppelin::security::interface::{IPausableDispatcher, IPausableDispatcherTrait};
@@ -18,9 +18,9 @@ use super::utils::{owner, new_owner, token0, token1};
 
 fn setup_factory() -> (ContractAddress, ContractAddress) {
     let owner = owner();
-    let pool_class = declare('JediSwapV2Pool');
+    let pool_class = declare("JediSwapV2Pool");
 
-    let factory_class = declare('JediSwapV2Factory');
+    let factory_class = declare("JediSwapV2Factory");
     let mut factory_constructor_calldata = Default::default();
     Serde::serialize(@owner, ref factory_constructor_calldata);
     Serde::serialize(@pool_class.class_hash, ref factory_constructor_calldata);
@@ -48,7 +48,7 @@ fn test_owner_on_deployment() {
 
 #[test]
 fn test_initial_enabled_fee_amounts() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
     assert(factory_dispatcher.fee_amount_tick_spacing(100) == 2, 'Invalid fee amount');
@@ -59,25 +59,25 @@ fn test_initial_enabled_fee_amounts() {
 
 #[test]
 fn test_initial_fee_protocol() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
-    assert(factory_dispatcher.get_fee_protocol() == 0, 'Invalid fee protcol');
+    assert(factory_dispatcher.get_fee_protocol() == 0, 'Invalid fee protocol');
 }
 
 #[test]
 fn test_initial_paused_state() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
 
     let pausable_dispatcher = IPausableDispatcher { contract_address: factory_address };
-    
+
     assert(!pausable_dispatcher.is_paused(), 'Paused');
 }
 
 #[test]
 #[should_panic(expected: ('tokens must be different',))]
 fn test_create_pool_fails_if_tokena_equals_tokenb() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
     factory_dispatcher.create_pool(token0(), token0(), 100);
@@ -86,7 +86,7 @@ fn test_create_pool_fails_if_tokena_equals_tokenb() {
 #[test]
 #[should_panic(expected: ('tokens must be non zero',))]
 fn test_create_pool_fails_if_tokena_is_zero() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
     factory_dispatcher.create_pool(contract_address_try_from_felt252(0).unwrap(), token0(), 100);
@@ -95,7 +95,7 @@ fn test_create_pool_fails_if_tokena_is_zero() {
 #[test]
 #[should_panic(expected: ('tokens must be non zero',))]
 fn test_create_pool_fails_if_tokenb_is_zero() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
     factory_dispatcher.create_pool(token0(), contract_address_try_from_felt252(0).unwrap(), 100);
@@ -104,7 +104,7 @@ fn test_create_pool_fails_if_tokenb_is_zero() {
 #[test]
 #[should_panic(expected: ('tick spacing not initialized',))]
 fn test_create_pool_fails_if_fee_amount_is_not_enabled() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
     factory_dispatcher.create_pool(token0(), token1(), 250);
@@ -112,7 +112,7 @@ fn test_create_pool_fails_if_fee_amount_is_not_enabled() {
 
 #[test]
 fn test_create_pool_succeeds_for_fee_100() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let pool_address = create_pool(factory_address, 100);
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
@@ -126,7 +126,7 @@ fn test_create_pool_succeeds_for_fee_100() {
 
 #[test]
 fn test_create_pool_succeeds_for_fee_500() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let pool_address = create_pool(factory_address, 500);
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
@@ -140,7 +140,7 @@ fn test_create_pool_succeeds_for_fee_500() {
 
 #[test]
 fn test_create_pool_succeeds_for_fee_3000() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let pool_address = create_pool(factory_address, 3000);
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
@@ -154,7 +154,7 @@ fn test_create_pool_succeeds_for_fee_3000() {
 
 #[test]
 fn test_create_pool_succeeds_for_fee_10000() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let pool_address = create_pool(factory_address, 10000);
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
@@ -168,7 +168,7 @@ fn test_create_pool_succeeds_for_fee_10000() {
 
 #[test]
 fn test_create_pool_succeeds_get_pool_in_reverse() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let pool_address = create_pool(factory_address, 100);
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
@@ -180,7 +180,7 @@ fn test_create_pool_succeeds_get_pool_in_reverse() {
 
 #[test]
 fn test_create_pool_succeeds_pool_created_event() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let mut spy = spy_events(SpyOn::One(factory_address));
 
     let pool_address = create_pool(factory_address, 100);
@@ -207,15 +207,15 @@ fn test_create_pool_succeeds_pool_created_event() {
 #[test]
 #[should_panic(expected: ('pool already created',))]
 fn test_create_pool_fails_if_already_created() {
-    let (owner, factory_address) = setup_factory();
-    let pool_address = create_pool(factory_address, 100);
+    let (_, factory_address) = setup_factory();
+    create_pool(factory_address, 100);
     create_pool(factory_address, 100);
 }
 
 #[test]
 #[should_panic(expected: ('Caller is not the owner',))]
 fn test_transfer_ownership_fails_with_wrong_caller() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
 
     let ownable_dispatcher = IOwnableDispatcher { contract_address: factory_address };
     ownable_dispatcher.transfer_ownership(new_owner());
@@ -253,7 +253,7 @@ fn test_transfer_ownership_succeeds_with_owner() {
 #[test]
 #[should_panic(expected: ('Caller is not the owner',))]
 fn test_enable_fee_amount_fails_with_wrong_caller() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
@@ -341,8 +341,6 @@ fn test_enable_fee_amount_succeeds_and_pool_can_be_created() {
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 
-    let mut spy = spy_events(SpyOn::One(factory_address));
-
     start_prank(CheatTarget::One(factory_address), owner);
     factory_dispatcher.enable_fee_amount(1000, 20);
     stop_prank(CheatTarget::One(factory_address));
@@ -361,7 +359,7 @@ fn test_enable_fee_amount_succeeds_and_pool_can_be_created() {
 #[test]
 #[should_panic(expected: ('Caller is not the owner',))]
 fn test_set_fee_protocol_fails_with_wrong_caller() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
 
     let factory_dispatcher = IJediSwapV2FactoryDispatcher { contract_address: factory_address };
 

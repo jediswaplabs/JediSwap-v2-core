@@ -1,5 +1,5 @@
 use starknet::ContractAddress;
-use yas_core::numbers::signed_integer::{i32::i32};
+use jediswap_v2_core::libraries::signed_integers::{i32::i32};
 
 #[starknet::interface]
 trait IPoolMintTest<TContractState> {
@@ -22,7 +22,7 @@ trait IPoolMintTest<TContractState> {
 #[starknet::contract]
 mod PoolMintTest {
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
-    use yas_core::numbers::signed_integer::{i32::i32};
+    use jediswap_v2_core::libraries::signed_integers::{i32::i32};
     use jediswap_v2_core::jediswap_v2_pool::{
         IJediSwapV2PoolDispatcher, IJediSwapV2PoolDispatcherTrait
     };
@@ -57,7 +57,7 @@ mod PoolMintTest {
             tick_upper: i32,
             amount: u128
         ) {
-            let caller = get_caller_address();
+            // let caller = get_caller_address();
             let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool };
             let mut callback_data: Array<felt252> = ArrayTrait::new();
             // callback_data.append(caller.into());    // TODO when possible

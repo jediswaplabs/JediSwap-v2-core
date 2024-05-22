@@ -1,4 +1,6 @@
 mod test_libraries {
+    mod test_bit_math;
+    mod test_full_math;
     mod test_sqrt_price_math;
     mod test_swap_math;
     mod test_tick_bitmap;

@@ -3,8 +3,9 @@ use jediswap_v2_core::libraries::sqrt_price_math::SqrtPriceMath::{
     MAX_UINT160, R96, get_next_sqrt_price_from_input, get_next_sqrt_price_from_output,
     get_amount0_delta_unsigned, get_amount1_delta_unsigned
 };
-use yas_core::utils::math_utils::{pow, FullMath::mul_div, BitShift::BitShiftTrait};
-use snforge_std::PrintTrait;
+use jediswap_v2_core::libraries::bitshift_trait::BitShiftTrait;
+use jediswap_v2_core::libraries::math_utils::pow;
+use jediswap_v2_core::libraries::full_math::mul_div;
 
 fn expand_to_18_decimals(n: u256) -> u256 {
     n * pow(10, 18)
@@ -66,7 +67,7 @@ fn test_get_next_sqrt_price_from_input_returns_input_price_if_amount_in_is_zero_
 }
 
 #[test]
-fn test_get_next_sqrt_price_from_input_returns_the_minumum_price_for_max_inputs() { // TODO getting u256_mul Overflow
+fn test_get_next_sqrt_price_from_input_returns_the_minumum_price_for_max_inputs() {
     let price = MAX_UINT160;
     let liquidity: u128 = BoundedInt::max();
     let max_amount_no_overflow: u256 = BoundedInt::max() - (liquidity.into().shl(R96) / price);
@@ -106,7 +107,7 @@ fn test_get_next_sqrt_price_from_input_amount_in_gt_uint_96_max_and_zero_for_one
 }
 
 #[test]
-fn test_get_next_sqrt_price_from_input_can_return_1_with_enough_amount_and_zero_for_one_equals_true() { // TODO u256_mul Overflow
+fn test_get_next_sqrt_price_from_input_can_return_1_with_enough_amount_and_zero_for_one_equals_true() {
     let price = 79228162514264337593543950336; // encode_price_sqrt(1, 1);
     let liquidity: u128 = 1;
     let amount = BoundedInt::max() / 2;
@@ -236,7 +237,7 @@ fn test_get_next_sqrt_price_from_output_fails_if_amount_out_is_impossible_in_zer
 }
 
 #[test]
-#[should_panic(expected: ('u256_mul Overflow',))] // TODO is this correct error?
+#[should_panic(expected: ('product overflows',))]
 fn test_get_next_sqrt_price_from_output_fails_if_amount_out_is_impossible_in_one_to_zero_direction() {
     let price = 79228162514264337593543950336; // encode_price_sqrt(1, 1);
     let liquidity = 1;

@@ -9,7 +9,7 @@ use jediswap_v2_core::test_contracts::jediswap_v2_pool_v2::{
 };
 use jediswap_v2_core::jediswap_v2_pool::{IJediSwapV2PoolDispatcher, IJediSwapV2PoolDispatcherTrait};
 use snforge_std::{
-    PrintTrait, declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
+    declare, ContractClassTrait, start_prank, stop_prank, CheatTarget, spy_events,
     SpyOn, EventSpy, EventFetcher, Event, EventAssertions
 };
 
@@ -19,9 +19,9 @@ use super::utils::{owner, new_owner, token0, token1};
 
 fn setup_factory() -> (ContractAddress, ContractAddress) {
     let owner = owner();
-    let pool_class = declare('JediSwapV2Pool');
+    let pool_class = declare("JediSwapV2Pool");
 
-    let factory_class = declare('JediSwapV2Factory');
+    let factory_class = declare("JediSwapV2Factory");
     let mut factory_constructor_calldata = Default::default();
     Serde::serialize(@owner, ref factory_constructor_calldata);
     Serde::serialize(@pool_class.class_hash, ref factory_constructor_calldata);
@@ -52,12 +52,12 @@ fn initialize_pool_1_10(factory_address: ContractAddress, fee: u32) -> ContractA
 #[test]
 #[should_panic(expected: ('Invalid caller',))]
 fn test_upgrade_fails_with_wrong_caller() {
-    let (owner, factory_address) = setup_factory();
+    let (_, factory_address) = setup_factory();
     let pool_address = initialize_pool_1_10(factory_address, 100);
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
-    let new_pool_class_hash = declare('JediSwapV2PoolV2').class_hash;
+    let new_pool_class_hash = declare("JediSwapV2PoolV2").class_hash;
 
     pool_dispatcher.upgrade(new_pool_class_hash);
 }
@@ -69,7 +69,7 @@ fn test_upgrade_succeeds_with_owner_emits_event() {
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
-    let new_pool_class_hash = declare('JediSwapV2PoolV2').class_hash;
+    let new_pool_class_hash = declare("JediSwapV2PoolV2").class_hash;
 
     let mut spy = spy_events(SpyOn::One(pool_address));
 
@@ -111,7 +111,7 @@ fn test_upgrade_succeeds_old_selector_fails() {
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
-    let new_pool_class_hash = declare('JediSwapV2PoolV2').class_hash;
+    let new_pool_class_hash = declare("JediSwapV2PoolV2").class_hash;
 
     start_prank(CheatTarget::One(pool_address), owner);
     pool_dispatcher.upgrade(new_pool_class_hash);
@@ -127,7 +127,7 @@ fn test_upgrade_succeeds_new_selector() {
 
     let pool_dispatcher = IJediSwapV2PoolDispatcher { contract_address: pool_address };
 
-    let new_pool_class_hash = declare('JediSwapV2PoolV2').class_hash;
+    let new_pool_class_hash = declare("JediSwapV2PoolV2").class_hash;
 
     start_prank(CheatTarget::One(pool_address), owner);
     pool_dispatcher.upgrade(new_pool_class_hash);
@@ -147,7 +147,7 @@ fn test_upgrade_succeeds_state_remains_same() {
 
     let token0_address = pool_dispatcher.get_token0();
 
-    let new_pool_class_hash = declare('JediSwapV2PoolV2').class_hash;
+    let new_pool_class_hash = declare("JediSwapV2PoolV2").class_hash;
 
     start_prank(CheatTarget::One(pool_address), owner);
     pool_dispatcher.upgrade(new_pool_class_hash);
